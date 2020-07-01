@@ -1,0 +1,10 @@
+# node modules:
+node_modules
+
+# distribution:
+/dist
+
+# test enviroment:
+/sandbox/**/*
+!sandbox/exemple.index.html
+!sandbox/tsconfig.json

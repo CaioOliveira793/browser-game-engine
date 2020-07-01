@@ -1,0 +1,42 @@
+{
+	"name": "galiel",
+	"author": {
+		"name": "Caio Oliveira"
+	},
+	"version": "0.0.1",
+	"license": "Apache-2.0",
+	"description": "A web based game engine",
+	"private": "true",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/CaioOliveira793/Galiel.git"
+	},
+	"keywords": [
+		"engine",
+		"game",
+		"browser"
+	],
+	"main": "src/index.ts",
+	"scripts": {
+		"build": "tsc && tscpaths -p tsconfig.json -s ./src -o ./dist",
+		"dev": "webpack-dev-server"
+	},
+	"devDependencies": {
+		"@types/gl-matrix": "^2.4.5",
+		"@typescript-eslint/eslint-plugin": "^3.5.0",
+		"@typescript-eslint/parser": "^3.5.0",
+		"awesome-typescript-loader": "^5.2.1",
+		"clean-webpack-plugin": "^3.0.0",
+		"copy-webpack-plugin": "^6.0.2",
+		"eslint": "^7.3.1",
+		"tsconfig-paths-webpack-plugin": "^3.2.0",
+		"tscpaths": "0.0.9",
+		"typescript": "^3.9.5",
+		"webpack": "^4.43.0",
+		"webpack-cli": "^3.3.12",
+		"webpack-dev-server": "^3.11.0"
+	},
+	"dependencies": {
+		"gl-matrix": "^3.3.0"
+	}
+}
