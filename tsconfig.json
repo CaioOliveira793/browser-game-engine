@@ -9,10 +9,6 @@
 		"rootDir": "./src",
     "baseUrl": "./src",
     "paths": {},
-		"typeRoots": [
-      "./node_modules/@types",
-      "./src/@types"
-    ],
     "strict": true,
 		"preserveConstEnums": true,
 		"removeComments": true,
