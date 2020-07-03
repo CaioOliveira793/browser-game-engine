@@ -1,5 +1,7 @@
 import { TypedEvents } from './Events/Events';
 import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent } from './Events/ScreenEvents';
+import { KeyCodeMapTable } from './Inputs/KeyCodes';
+import { KeyPressEvent, KeyReleaseEvent, KeyTypedEvent } from './Events/KeyboardEvents';
 
 abstract class Application {
 	private canvas: HTMLCanvasElement;
@@ -75,6 +77,10 @@ abstract class Application {
 		this.canvas.addEventListener('focus', this.handleScreenFocus, true);
 		this.canvas.addEventListener('blur', this.handleScreenBlur, true);
 		this.observer.observe(this.canvas.parentElement as HTMLElement, { childList: true });
+
+		// keyboar events:
+		this.canvas.addEventListener('keydown', this.handleKeyboardDown, true);
+		this.canvas.addEventListener('keyup', this.handleKeyboardUp, true);
 	}
 
 	// remove events callbacks:
@@ -84,6 +90,10 @@ abstract class Application {
 		this.canvas.removeEventListener('focus', this.handleScreenFocus, true);
 		this.canvas.removeEventListener('blur', this.handleScreenBlur, true);
 		this.observer.disconnect();
+
+		// keyboar events:
+		this.canvas.removeEventListener('keydown', this.handleKeyboardDown, true);
+		this.canvas.removeEventListener('keyup', this.handleKeyboardUp, true);
 	}
 
 
@@ -125,6 +135,37 @@ abstract class Application {
 		event.stopImmediatePropagation();
 
 		const e = new ScreenBlurEvent();
+		this.onEvent(e);
+	}
+
+	//// keyboard: ////////////////////////////////////////////////////
+	private handleKeyboardDown = (event: KeyboardEvent): void => {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const { code, repeat, shiftKey, ctrlKey, altKey, metaKey } = event;
+
+		const pressEvent = new KeyPressEvent(code as keyof typeof KeyCodeMapTable, repeat,
+			shiftKey, ctrlKey, altKey, metaKey);
+
+		if (!repeat) {
+			const typedEvent = new KeyTypedEvent(code as keyof typeof KeyCodeMapTable,
+				shiftKey, ctrlKey, altKey, metaKey);
+			this.onEvent(typedEvent);
+		}
+
+		this.onEvent(pressEvent);
+	}
+
+	private handleKeyboardUp = (event: KeyboardEvent): void => {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const { code, shiftKey, ctrlKey, altKey, metaKey } = event;
+
+		const e = new KeyReleaseEvent(code as keyof typeof KeyCodeMapTable,
+			shiftKey, ctrlKey, altKey, metaKey);
+
 		this.onEvent(e);
 	}
 }

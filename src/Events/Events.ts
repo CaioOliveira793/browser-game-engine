@@ -1,4 +1,5 @@
 import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent } from './ScreenEvents';
+import { KeyPressEvent, KeyReleaseEvent, KeyTypedEvent } from './KeyboardEvents';
 
 export enum EventCategory {
 	None = 0,
@@ -22,8 +23,8 @@ export interface BaseEvent {
 }
 
 export type TypedEvents =
-ScreenResizeEvent | ScreenCloseEvent | ScreenFocusEvent | ScreenBlurEvent
-;
+ScreenResizeEvent | ScreenCloseEvent | ScreenFocusEvent | ScreenBlurEvent |
+KeyPressEvent | KeyReleaseEvent | KeyTypedEvent;
 
 export type EventCallback<T extends TypedEvents> = (event: T) => boolean;
 
