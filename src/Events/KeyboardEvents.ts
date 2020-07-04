@@ -2,6 +2,14 @@ import { BaseEvent, EventCategory, EventType } from './Events';
 import { KeyCodeMapTable } from '../Inputs/KeyCodes';
 
 
+export type KeyboardCommandKeys = {
+	shiftOn: boolean;
+	ctrlOn: boolean;
+	altOn: boolean;
+	superOn: boolean;
+};
+
+
 export class KeyPressEvent implements BaseEvent {
 	public handled: boolean;
 
@@ -10,19 +18,12 @@ export class KeyPressEvent implements BaseEvent {
 
 	public readonly code: number;
 	public readonly repeat: boolean;
-	public readonly shiftOn: boolean;
-	public readonly ctrlOn: boolean;
-	public readonly altOn: boolean;
-	public readonly superOn: boolean;
+	public readonly command: KeyboardCommandKeys;
 
-	constructor(code: keyof typeof KeyCodeMapTable, repeat: boolean, shiftOn: boolean,
-		ctrlOn: boolean, altOn: boolean, superOn: boolean) {
+	constructor(code: keyof typeof KeyCodeMapTable, repeat: boolean, commandKeys: KeyboardCommandKeys) {
 		this.code =  KeyCodeMapTable[code];
 		this.repeat = repeat;
-		this.shiftOn = shiftOn;
-		this.ctrlOn = ctrlOn;
-		this.altOn = altOn;
-		this.superOn = superOn;
+		this.command = commandKeys;
 
 		this.handled = false;
 		this.category = EventCategory.Keyboard;
@@ -37,18 +38,11 @@ export class KeyReleaseEvent implements BaseEvent {
 	public readonly type: EventType;
 
 	public readonly code: number;
-	public readonly shiftOn: boolean;
-	public readonly ctrlOn: boolean;
-	public readonly altOn: boolean;
-	public readonly superOn: boolean;
+	public readonly command: KeyboardCommandKeys;
 
-	constructor(code: keyof typeof KeyCodeMapTable, shiftOn: boolean, ctrlOn: boolean,
-		altOn: boolean, superOn: boolean) {
+	constructor(code: keyof typeof KeyCodeMapTable, commandKeys: KeyboardCommandKeys) {
 		this.code =  KeyCodeMapTable[code];
-		this.shiftOn = shiftOn;
-		this.ctrlOn = ctrlOn;
-		this.altOn = altOn;
-		this.superOn = superOn;
+		this.command = commandKeys;
 
 		this.handled = false;
 		this.category = EventCategory.Keyboard;
@@ -63,18 +57,11 @@ export class KeyTypedEvent implements BaseEvent {
 	public readonly type: EventType;
 
 	public readonly code: number;
-	public readonly shiftOn: boolean;
-	public readonly ctrlOn: boolean;
-	public readonly altOn: boolean;
-	public readonly superOn: boolean;
+	public readonly command: KeyboardCommandKeys;
 
-	constructor(code: keyof typeof KeyCodeMapTable, shiftOn: boolean, ctrlOn: boolean,
-		altOn: boolean, superOn: boolean) {
+	constructor(code: keyof typeof KeyCodeMapTable, commandKeys: KeyboardCommandKeys) {
 		this.code =  KeyCodeMapTable[code];
-		this.shiftOn = shiftOn;
-		this.ctrlOn = ctrlOn;
-		this.altOn = altOn;
-		this.superOn = superOn;
+		this.command = commandKeys;
 
 		this.handled = false;
 		this.category = EventCategory.Keyboard;

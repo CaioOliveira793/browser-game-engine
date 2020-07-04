@@ -14,7 +14,7 @@ export class ScreenResizeEvent implements BaseEvent {
 		this.height = height;
 
 		this.handled = false;
-		this.category = EventCategory.Application;
+		this.category = EventCategory.Screen;
 		this.type = EventType.ScreenResize;
 	}
 }
@@ -27,7 +27,7 @@ export class ScreenCloseEvent implements BaseEvent {
 
 	constructor() {
 		this.handled = false;
-		this.category = EventCategory.Application;
+		this.category = EventCategory.Screen;
 		this.type = EventType.ScreenClose;
 	}
 }
@@ -40,7 +40,7 @@ export class ScreenFocusEvent implements BaseEvent {
 
 	constructor() {
 		this.handled = false;
-		this.category = EventCategory.Application;
+		this.category = EventCategory.Screen;
 		this.type = EventType.ScreenFocus;
 	}
 }
@@ -53,7 +53,7 @@ export class ScreenBlurEvent implements BaseEvent {
 
 	constructor() {
 		this.handled = false;
-		this.category = EventCategory.Application;
+		this.category = EventCategory.Screen;
 		this.type = EventType.ScreenBlur;
 	}
 }

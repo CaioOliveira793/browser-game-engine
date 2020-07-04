@@ -2,6 +2,7 @@ import { TypedEvents } from './Events/Events';
 import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent } from './Events/ScreenEvents';
 import { KeyCodeMapTable } from './Inputs/KeyCodes';
 import { KeyPressEvent, KeyReleaseEvent, KeyTypedEvent } from './Events/KeyboardEvents';
+import { MouseButtonTypedEvent, MouseButtonReleaseEvent, MouseMoveEvent, MouseScrollEvent } from './Events/MouseEvents';
 
 abstract class Application {
 	private canvas: HTMLCanvasElement;
@@ -78,9 +79,15 @@ abstract class Application {
 		this.canvas.addEventListener('blur', this.handleScreenBlur, true);
 		this.observer.observe(this.canvas.parentElement as HTMLElement, { childList: true });
 
-		// keyboar events:
+		// keyboard events:
 		this.canvas.addEventListener('keydown', this.handleKeyboardDown, true);
 		this.canvas.addEventListener('keyup', this.handleKeyboardUp, true);
+
+		// mouse events:
+		this.canvas.addEventListener('mousedown', this.handleMouseDown, true);
+		this.canvas.addEventListener('mouseup', this.handleMouseUp, true);
+		this.canvas.addEventListener('mousemove', this.handleMouseMove, true);
+		this.canvas.addEventListener('wheel', this.handleMouseScroll, true);
 	}
 
 	// remove events callbacks:
@@ -91,9 +98,15 @@ abstract class Application {
 		this.canvas.removeEventListener('blur', this.handleScreenBlur, true);
 		this.observer.disconnect();
 
-		// keyboar events:
+		// keyboard events:
 		this.canvas.removeEventListener('keydown', this.handleKeyboardDown, true);
 		this.canvas.removeEventListener('keyup', this.handleKeyboardUp, true);
+
+		// mouse events:
+		this.canvas.removeEventListener('mousedown', this.handleMouseDown, true);
+		this.canvas.removeEventListener('mouseup', this.handleMouseUp, true);
+		this.canvas.removeEventListener('mousemove', this.handleMouseMove, true);
+		this.canvas.removeEventListener('wheel', this.handleMouseScroll, true);
 	}
 
 
@@ -143,14 +156,18 @@ abstract class Application {
 		event.preventDefault();
 		event.stopImmediatePropagation();
 
-		const { code, repeat, shiftKey, ctrlKey, altKey, metaKey } = event;
+		const commandKeys = {
+			shiftOn: event.shiftKey,
+			ctrlOn: event.ctrlKey,
+			altOn: event.altKey,
+			superOn: event.metaKey
+		};
 
-		const pressEvent = new KeyPressEvent(code as keyof typeof KeyCodeMapTable, repeat,
-			shiftKey, ctrlKey, altKey, metaKey);
+		const pressEvent = new KeyPressEvent(event.code as keyof typeof KeyCodeMapTable,
+			event.repeat, commandKeys);
 
-		if (!repeat) {
-			const typedEvent = new KeyTypedEvent(code as keyof typeof KeyCodeMapTable,
-				shiftKey, ctrlKey, altKey, metaKey);
+		if (!event.repeat) {
+			const typedEvent = new KeyTypedEvent(event.code as keyof typeof KeyCodeMapTable, commandKeys);
 			this.onEvent(typedEvent);
 		}
 
@@ -161,11 +178,94 @@ abstract class Application {
 		event.preventDefault();
 		event.stopImmediatePropagation();
 
-		const { code, shiftKey, ctrlKey, altKey, metaKey } = event;
+		const commandKeys = {
+			shiftOn: event.shiftKey,
+			ctrlOn: event.ctrlKey,
+			altOn: event.altKey,
+			superOn: event.metaKey
+		};
 
-		const e = new KeyReleaseEvent(code as keyof typeof KeyCodeMapTable,
-			shiftKey, ctrlKey, altKey, metaKey);
+		const e = new KeyReleaseEvent(event.code as keyof typeof KeyCodeMapTable, commandKeys);
+		this.onEvent(e);
+	}
 
+	//// mouse: ///////////////////////////////////////////////////////
+	private handleMouseDown = (event: MouseEvent): void => {
+		event.stopImmediatePropagation();
+
+		const commandKeys = {
+			shiftOn: event.shiftKey,
+			ctrlOn: event.ctrlKey,
+			altOn: event.altKey,
+			superOn: event.metaKey
+		};
+
+		const position = {
+			x: event.offsetX,
+			y: event.offsetY,
+		};
+
+		const e = new MouseButtonTypedEvent(event.button, position, commandKeys);
+		this.onEvent(e);
+	}
+
+	private handleMouseUp = (event: MouseEvent): void => {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const commandKeys = {
+			shiftOn: event.shiftKey,
+			ctrlOn: event.ctrlKey,
+			altOn: event.altKey,
+			superOn: event.metaKey
+		};
+
+		const position = {
+			x: event.offsetX,
+			y: event.offsetY,
+		};
+
+		const e = new MouseButtonReleaseEvent(event.button, position, commandKeys);
+		this.onEvent(e);
+	}
+
+	private handleMouseMove = (event: MouseEvent): void => {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const commandKeys = {
+			shiftOn: event.shiftKey,
+			ctrlOn: event.ctrlKey,
+			altOn: event.altKey,
+			superOn: event.metaKey
+		};
+
+		const position = {
+			x: event.offsetX,
+			y: event.offsetY,
+		};
+
+		const e = new MouseMoveEvent(position, commandKeys);
+		this.onEvent(e);
+	}
+
+	private handleMouseScroll = (event: WheelEvent): void => {
+		event.preventDefault();
+		event.stopImmediatePropagation();
+
+		const commandKeys = {
+			shiftOn: event.shiftKey,
+			ctrlOn: event.ctrlKey,
+			altOn: event.altKey,
+			superOn: event.metaKey
+		};
+
+		const position = {
+			x: event.offsetX,
+			y: event.offsetY,
+		};
+
+		const e = new MouseScrollEvent(event.deltaY, position, commandKeys);
 		this.onEvent(e);
 	}
 }

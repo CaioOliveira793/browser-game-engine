@@ -1,9 +1,11 @@
 import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent } from './ScreenEvents';
 import { KeyPressEvent, KeyReleaseEvent, KeyTypedEvent } from './KeyboardEvents';
+import { MouseButtonTypedEvent, MouseButtonReleaseEvent, MouseMoveEvent, MouseScrollEvent } from './MouseEvents';
+
 
 export enum EventCategory {
 	None = 0,
-	Application,
+	Screen,
 	Keyboard,
 	Mouse
 }
@@ -12,7 +14,7 @@ export enum EventType {
 	None = 0,
 	ScreenResize, ScreenClose, ScreenFocus, ScreenBlur,
 	KeyPress, KeyRelease, KeyTyped,
-	MouseBottonPress, MouseBottonRelease, MouseMove, MouseScroll
+	MouseButtonTyped, MouseButtonRelease, MouseMove, MouseScroll
 }
 
 export interface BaseEvent {
@@ -24,7 +26,8 @@ export interface BaseEvent {
 
 export type TypedEvents =
 ScreenResizeEvent | ScreenCloseEvent | ScreenFocusEvent | ScreenBlurEvent |
-KeyPressEvent | KeyReleaseEvent | KeyTypedEvent;
+KeyPressEvent | KeyReleaseEvent | KeyTypedEvent |
+MouseButtonTypedEvent | MouseButtonReleaseEvent | MouseMoveEvent | MouseScrollEvent;
 
 export type EventCallback<T extends TypedEvents> = (event: T) => boolean;
 
