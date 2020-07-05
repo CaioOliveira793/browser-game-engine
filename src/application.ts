@@ -1,27 +1,55 @@
+import Screen, { EventCallback } from './Screen';
 
 
-export interface ScreenProps extends WebGLContextAttributes {
-	width: number;
-	height: number;
-}
+abstract class Application {
+	private screen: Screen;
 
+	private isRunning: boolean;
+	private previousTime: number;
 
-class Application {
-	private canvas: HTMLCanvasElement;
-	private context: WebGLRenderingContext;
+	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
+		this.screen = new Screen(canvas, width, height, this.eventPropagator);
 
-	constructor(canvas: HTMLCanvasElement, screenProperties: ScreenProps) {
-		this.canvas = canvas;
-		this.canvas.width = screenProperties.width;
-		this.canvas.height = screenProperties.height;
+		this.isRunning = false;
+		this.previousTime = 0;
+	}
 
-		const webgl = canvas.getContext('webgl', screenProperties);
+	public requestFullscreen = (): Promise<void> => {
+		return this.screen.setFullscreen();
+	}
 
-		if (webgl) {
-			this.context = webgl;
+	public init = (): void => {
+		this.screen.addEvents();
+		this.isRunning = true;
+		requestAnimationFrame(this.run);
+	}
+
+	public end = (): void => {
+		this.screen.removeEvents();
+		this.isRunning = false;
+	}
+
+	// only called by the class Application
+	protected abstract onEvent: EventCallback;
+
+	private run = (time: number): void => {
+		const deltaTime = time - this.previousTime;
+		this.previousTime = time;
+
+		if (this.isRunning) {
+			// game logic
+
+			requestAnimationFrame(this.run);
 		} else {
-			throw new Error('Your browser appears not support WebGL');
+			// game on pause
 		}
+	}
+
+	private eventPropagator: EventCallback = (e) => {
+		this.onEvent(e);
+
+		// propagate events to layers below:
+		// layers.forEach(...);
 	}
 }
 
