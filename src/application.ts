@@ -1,6 +1,6 @@
 import Screen from './Screen';
 import Layer from './Layer';
-import { EventCategory, TypedEvents } from './Events/Events';
+import { EventCategory, TypedEvents, EventType } from './Events/Events';
 
 abstract class Application {
 	private screen: Screen;
@@ -8,24 +8,28 @@ abstract class Application {
 	private isRunning: boolean;
 	private previousTime: number;
 
-	private layerList: Map<Layer, Layer>;
+	private layerQueue: Map<Layer, Layer>;
+
+	private eventQueue: Map<EventType, TypedEvents>;
 
 	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
-		this.screen = new Screen(canvas, width, height, this.eventPropagator);
+		this.screen = new Screen(canvas, width, height, this.storeEvents);
 
 		this.isRunning = false;
 		this.previousTime = 0;
 
-		this.layerList = new Map();
+		this.layerQueue = new Map();
+
+		this.eventQueue = new Map();
 	}
 
 	public pushLayer(layer: Layer): void {
-		this.layerList.set(layer, layer);
+		this.layerQueue.set(layer, layer);
 		layer.onAttach();
 	}
 
 	public popLayer(layer: Layer): boolean {
-		if (this.layerList.delete(layer)) {
+		if (this.layerQueue.delete(layer)) {
 			layer.onDetach();
 			return true;
 		}
@@ -57,8 +61,11 @@ abstract class Application {
 		const deltaTime = time - this.previousTime;
 		this.previousTime = time;
 
+		this.eventQueue.forEach(event => this.eventPropagator(event));
+		this.eventQueue.clear();
+
 		if (this.isRunning) {
-			this.layerList.forEach(layer => layer.onUpdate(deltaTime));
+			this.layerQueue.forEach(layer => layer.onUpdate(deltaTime));
 
 			requestAnimationFrame(this.run);
 		}
@@ -69,19 +76,23 @@ abstract class Application {
 
 		case EventCategory.Screen:
 			this.onKeyboardEvent(e);
-			this.layerList.forEach(layer => layer.onKeyboardEvent(e));
+			this.layerQueue.forEach(layer => layer.onKeyboardEvent(e));
 			break;
 
 		case EventCategory.Keyboard:
 			this.onScreenEvent(e);
-			this.layerList.forEach(layer => layer.onScreenEvent(e));
+			this.layerQueue.forEach(layer => layer.onScreenEvent(e));
 			break;
 
 		case EventCategory.Mouse:
 			this.onMouseEvent(e);
-			this.layerList.forEach(layer => layer.onMouseEvent(e));
+			this.layerQueue.forEach(layer => layer.onMouseEvent(e));
 			break;
 		}
+	}
+
+	private storeEvents = (e: TypedEvents): void => {
+		this.eventQueue.set(e.type, e);
 	}
 }
 
