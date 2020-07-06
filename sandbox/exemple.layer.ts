@@ -18,7 +18,15 @@ class ExempleLayer extends Layer {
 		console.log('exemple layer update', deltaTime);
 	}
 
-	onEvent = (e: TypedEvents): void => {
+	onKeyboardEvent = (e: TypedEvents): void => {
+		console.log(e);
+	}
+
+	onMouseEvent = (e: TypedEvents): void => {
+		console.log(e);
+	}
+
+	onScreenEvent = (e: TypedEvents): void => {
 		console.log(e);
 	}
 }

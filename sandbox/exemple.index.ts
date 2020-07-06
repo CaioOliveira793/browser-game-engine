@@ -16,7 +16,9 @@ class MyApp extends Application {
 		}, 10000);
 	}
 
-	protected onEvent = (): void => {/* */}
+	protected onScreenEvent = (): void => {/* */}
+	protected onKeyboardEvent = (): void => {/* */}
+	protected onMouseEvent = (): void => {/* */}
 }
 
 

@@ -1,5 +1,6 @@
-import Screen, { EventCallback } from './Screen';
+import Screen from './Screen';
 import Layer from './Layer';
+import { EventCategory, TypedEvents } from './Events/Events';
 
 abstract class Application {
 	private screen: Screen;
@@ -48,7 +49,9 @@ abstract class Application {
 	}
 
 	// only called by the class Application
-	protected abstract onEvent: EventCallback;
+	protected abstract onScreenEvent: (e: TypedEvents) => void;
+	protected abstract onKeyboardEvent: (e: TypedEvents) => void;
+	protected abstract onMouseEvent: (e: TypedEvents) => void;
 
 	private run = (time: number): void => {
 		const deltaTime = time - this.previousTime;
@@ -61,10 +64,24 @@ abstract class Application {
 		}
 	}
 
-	private eventPropagator: EventCallback = (e) => {
-		this.onEvent(e);
+	private eventPropagator = (e: TypedEvents): void => {
+		switch (e.category) {
 
-		this.layerList.forEach(layer => layer.onEvent(e));
+		case EventCategory.Screen:
+			this.onKeyboardEvent(e);
+			this.layerList.forEach(layer => layer.onKeyboardEvent(e));
+			break;
+
+		case EventCategory.Keyboard:
+			this.onScreenEvent(e);
+			this.layerList.forEach(layer => layer.onScreenEvent(e));
+			break;
+
+		case EventCategory.Mouse:
+			this.onMouseEvent(e);
+			this.layerList.forEach(layer => layer.onMouseEvent(e));
+			break;
+		}
 	}
 }
 

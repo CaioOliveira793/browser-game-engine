@@ -7,7 +7,9 @@ export abstract class Layer {
 
 	public abstract onUpdate: (deltaTime: number) => void;
 
-	public abstract onEvent: (e: TypedEvents) => void;
+	public abstract onScreenEvent: (e: TypedEvents) => void;
+	public abstract onKeyboardEvent: (e: TypedEvents) => void;
+	public abstract onMouseEvent: (e: TypedEvents) => void;
 }
 
 export default Layer;
