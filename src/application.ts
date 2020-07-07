@@ -1,6 +1,7 @@
 import Screen from './Screen';
 import Layer from './Layer';
 import { EventCategory, TypedEvents, EventType } from './Events/Events';
+import Input, { InputEvents } from './Inputs/Input';
 
 abstract class Application {
 	private screen: Screen;
@@ -9,7 +10,6 @@ abstract class Application {
 	private previousTime: number;
 
 	private layerQueue: Map<Layer, Layer>;
-
 	private eventQueue: Map<EventType, TypedEvents>;
 
 	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
@@ -19,7 +19,6 @@ abstract class Application {
 		this.previousTime = 0;
 
 		this.layerQueue = new Map();
-
 		this.eventQueue = new Map();
 	}
 
@@ -61,6 +60,7 @@ abstract class Application {
 		const deltaTime = time - this.previousTime;
 		this.previousTime = time;
 
+		Input.reset();
 		this.eventQueue.forEach(event => this.eventPropagator(event));
 		this.eventQueue.clear();
 
@@ -73,19 +73,20 @@ abstract class Application {
 
 	private eventPropagator = (e: TypedEvents): void => {
 		switch (e.category) {
-
 		case EventCategory.Screen:
-			this.onKeyboardEvent(e);
-			this.layerQueue.forEach(layer => layer.onKeyboardEvent(e));
-			break;
-
-		case EventCategory.Keyboard:
 			this.onScreenEvent(e);
 			this.layerQueue.forEach(layer => layer.onScreenEvent(e));
 			break;
 
+		case EventCategory.Keyboard:
+			this.onKeyboardEvent(e);
+			Input.update(e as InputEvents);
+			this.layerQueue.forEach(layer => layer.onKeyboardEvent(e));
+			break;
+
 		case EventCategory.Mouse:
 			this.onMouseEvent(e);
+			Input.update(e as InputEvents);
 			this.layerQueue.forEach(layer => layer.onMouseEvent(e));
 			break;
 		}

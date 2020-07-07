@@ -6,29 +6,17 @@ class ExempleLayer extends Layer {
 		super();
 	}
 
-	onAttach = (): void => {
-		console.log('exemple layer attached');
-	}
+	onAttach = (): void => {/* */}
 
-	onDetach = (): void => {
-		console.log('exemple layer detached');
-	}
+	onDetach = (): void => {/* */}
 
-	onUpdate = (deltaTime: number): void => {
-		console.log('exemple layer update', deltaTime);
-	}
+	onUpdate = (deltaTime: number): void => {/* */}
 
-	onKeyboardEvent = (e: TypedEvents): void => {
-		console.log(e);
-	}
+	onKeyboardEvent = (e: TypedEvents): void => {/* */}
 
-	onMouseEvent = (e: TypedEvents): void => {
-		console.log(e);
-	}
+	onMouseEvent = (e: TypedEvents): void => {/* */}
 
-	onScreenEvent = (e: TypedEvents): void => {
-		console.log(e);
-	}
+	onScreenEvent = (e: TypedEvents): void => {/* */}
 }
 
 export default ExempleLayer;
