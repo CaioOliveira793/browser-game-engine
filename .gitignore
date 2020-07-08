@@ -7,4 +7,6 @@ node_modules
 # test enviroment:
 /sandbox/**/*
 !sandbox/exemple.index.html
+!sandbox/exemple.index.ts
+!sandbox/exemple.layer.ts
 !sandbox/tsconfig.json

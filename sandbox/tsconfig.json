@@ -5,7 +5,7 @@
 		"declaration": false,
 		"sourceMap": false,
 		"allowJs": true,
-		"isolatedModules": true,
+		"isolatedModules": false,
     "baseUrl": ".",
     "paths": {
 			"@engine/*": ["../src/*"]

@@ -5,8 +5,6 @@ import { KeyPressEvent, KeyReleaseEvent, KeyTypedEvent } from './Events/Keyboard
 import { MouseButtonTypedEvent, MouseButtonReleaseEvent, MouseMoveEvent, MouseScrollEvent } from './Events/MouseEvents';
 
 
-export type EventCallback = (e: TypedEvents) => void;
-
 export class Screen {
 	private canvas: HTMLCanvasElement;
 	private context: WebGLRenderingContext;
@@ -14,9 +12,9 @@ export class Screen {
 	private resolutionOffFullscreen: { width: number, height: number };
 
 	private observer: MutationObserver;
-	private eventCallback: EventCallback;
+	private eventCallback: (e: TypedEvents) => void;
 
-	constructor(canvas: HTMLCanvasElement, width: number, height: number, eventCallback: EventCallback) {
+	constructor(canvas: HTMLCanvasElement, width: number, height: number, eventCallback: (e: TypedEvents) => void) {
 		this.canvas = canvas;
 		this.canvas.width = width;
 		this.canvas.height = height;
