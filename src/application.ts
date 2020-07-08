@@ -11,7 +11,7 @@ abstract class Application {
 
 	private layerQueue: Map<Layer, Layer>;
 	private overlayQueue: Map<Layer, Layer>;
-	private eventQueue: Map<EventType, TypedEvents>;
+	private eventQueue: Set<TypedEvents>;
 
 	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
 		this.screen = new Screen(canvas, width, height, this.storeEvents);
@@ -21,7 +21,7 @@ abstract class Application {
 
 		this.layerQueue = new Map();
 		this.overlayQueue = new Map();
-		this.eventQueue = new Map();
+		this.eventQueue = new Set();
 	}
 
 	public pushLayer(layer: Layer): void {
@@ -113,7 +113,7 @@ abstract class Application {
 	}
 
 	private storeEvents = (e: TypedEvents): void => {
-		this.eventQueue.set(e.type, e);
+		this.eventQueue.add(e);
 	}
 }
 
