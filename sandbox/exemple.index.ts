@@ -9,7 +9,7 @@ class MyApp extends Application {
 		super(canvas, 854, 480);
 		this.layer = new ExempleLayer;
 
-		super.pushLayer(this.layer);
+		this.pushLayer(this.layer);
 
 		setTimeout(() => {
 			super.popLayer(this.layer);

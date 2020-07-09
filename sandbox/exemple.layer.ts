@@ -2,21 +2,17 @@ import Layer from '@engine/Layer';
 import { TypedEvents } from '@engine/Events/Events';
 
 class ExempleLayer extends Layer {
-	constructor() {
-		super();
-	}
+	public onAttach = (): void => {/* */}
 
-	onAttach = (): void => {/* */}
+	public onDetach = (): void => {/* */}
 
-	onDetach = (): void => {/* */}
+	public onUpdate = (deltaTime: number): void => {/* */}
 
-	onUpdate = (deltaTime: number): void => {/* */}
+	public onKeyboardEvent = (e: TypedEvents): void => {/* */}
 
-	onKeyboardEvent = (e: TypedEvents): void => {/* */}
+	public onMouseEvent = (e: TypedEvents): void => {/* */}
 
-	onMouseEvent = (e: TypedEvents): void => {/* */}
-
-	onScreenEvent = (e: TypedEvents): void => {/* */}
+	public onScreenEvent = (e: TypedEvents): void => {/* */}
 }
 
 export default ExempleLayer;

@@ -1,6 +1,6 @@
 import Screen from './Screen';
 import Layer from './Layer';
-import { EventCategory, TypedEvents, EventType } from './Events/Events';
+import { EventCategory, TypedEvents } from './Events/Events';
 import Input, { InputEvents } from './Inputs/Input';
 
 abstract class Application {
@@ -24,12 +24,12 @@ abstract class Application {
 		this.eventQueue = new Set();
 	}
 
-	public pushLayer(layer: Layer): void {
+	public pushLayer = (layer: Layer): void => {
 		this.layerQueue.set(layer, layer);
 		layer.onAttach();
 	}
 
-	public popLayer(layer: Layer): boolean {
+	public popLayer = (layer: Layer): boolean => {
 		if (this.layerQueue.delete(layer)) {
 			layer.onDetach();
 			return true;
@@ -38,12 +38,12 @@ abstract class Application {
 		return false;
 	}
 
-	public pushOverlay(overlay: Layer): void {
+	public pushOverlay = (overlay: Layer): void => {
 		this.overlayQueue.set(overlay, overlay);
 		overlay.onDetach();
 	}
 
-	public popOverlay(overlay: Layer): boolean {
+	public popOverlay = (overlay: Layer): boolean => {
 		if (this.overlayQueue.delete(overlay)) {
 			overlay.onDetach();
 			return true;
@@ -52,9 +52,7 @@ abstract class Application {
 		return false;
 	}
 
-	public requestFullscreen = (): Promise<void> => {
-		return this.screen.setFullscreen();
-	}
+	public requestFullscreen = (): Promise<void> => this.screen.setFullscreen()
 
 	public init = (): void => {
 		this.screen.addEvents();
@@ -90,25 +88,25 @@ abstract class Application {
 
 	private eventPropagator = (e: TypedEvents): void => {
 		switch (e.category) {
-		case EventCategory.Screen:
-			this.onScreenEvent(e);
-			this.layerQueue.forEach(layer => layer.onScreenEvent(e));
-			this.overlayQueue.forEach(overlay => overlay.onScreenEvent(e));
-			break;
+			case EventCategory.Screen:
+				this.onScreenEvent(e);
+				this.layerQueue.forEach(layer => layer.onScreenEvent(e));
+				this.overlayQueue.forEach(overlay => overlay.onScreenEvent(e));
+				break;
 
-		case EventCategory.Keyboard:
-			this.onKeyboardEvent(e);
-			Input.update(e as InputEvents);
-			this.layerQueue.forEach(layer => layer.onKeyboardEvent(e));
-			this.overlayQueue.forEach(overlay => overlay.onKeyboardEvent(e));
-			break;
+			case EventCategory.Keyboard:
+				this.onKeyboardEvent(e);
+				Input.update(e as InputEvents);
+				this.layerQueue.forEach(layer => layer.onKeyboardEvent(e));
+				this.overlayQueue.forEach(overlay => overlay.onKeyboardEvent(e));
+				break;
 
-		case EventCategory.Mouse:
-			this.onMouseEvent(e);
-			Input.update(e as InputEvents);
-			this.layerQueue.forEach(layer => layer.onMouseEvent(e));
-			this.overlayQueue.forEach(overlay => overlay.onMouseEvent(e));
-			break;
+			case EventCategory.Mouse:
+				this.onMouseEvent(e);
+				Input.update(e as InputEvents);
+				this.layerQueue.forEach(layer => layer.onMouseEvent(e));
+				this.overlayQueue.forEach(overlay => overlay.onMouseEvent(e));
+				break;
 		}
 	}
 

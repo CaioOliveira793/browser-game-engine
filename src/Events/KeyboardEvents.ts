@@ -21,7 +21,7 @@ export class KeyPressEvent implements BaseEvent {
 	public readonly command: KeyboardCommandKeys;
 
 	constructor(code: keyof typeof KeyCodeMapTable, repeat: boolean, commandKeys: KeyboardCommandKeys) {
-		this.code =  KeyCodeMapTable[code];
+		this.code = KeyCodeMapTable[code];
 		this.repeat = repeat;
 		this.command = commandKeys;
 
@@ -41,7 +41,7 @@ export class KeyReleaseEvent implements BaseEvent {
 	public readonly command: KeyboardCommandKeys;
 
 	constructor(code: keyof typeof KeyCodeMapTable, commandKeys: KeyboardCommandKeys) {
-		this.code =  KeyCodeMapTable[code];
+		this.code = KeyCodeMapTable[code];
 		this.command = commandKeys;
 
 		this.handled = false;
@@ -60,7 +60,7 @@ export class KeyTypedEvent implements BaseEvent {
 	public readonly command: KeyboardCommandKeys;
 
 	constructor(code: keyof typeof KeyCodeMapTable, commandKeys: KeyboardCommandKeys) {
-		this.code =  KeyCodeMapTable[code];
+		this.code = KeyCodeMapTable[code];
 		this.command = commandKeys;
 
 		this.handled = false;

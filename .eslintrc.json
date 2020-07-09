@@ -1,36 +1,157 @@
 {
-    "env": {
-        "browser": true,
-        "es2020": true
-    },
-    "extends": [
-        "eslint:recommended",
-        "plugin:@typescript-eslint/recommended"
-    ],
-    "parser": "@typescript-eslint/parser",
-    "parserOptions": {
-        "ecmaVersion": 11,
-        "sourceType": "module"
-    },
-    "plugins": [
-        "@typescript-eslint"
-    ],
-    "rules": {
-        "indent": [
-            "error",
-            "tab"
-        ],
-        "linebreak-style": [
-            "error",
-            "unix"
-        ],
-        "quotes": [
-            "error",
-            "single"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ]
-    }
+	"env": {
+		"browser": true,
+		"es2020": true
+	},
+	"extends": [
+		"eslint:recommended",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"parser": "@typescript-eslint/parser",
+	"parserOptions": {
+		"ecmaVersion": 11,
+		"sourceType": "module"
+	},
+	"plugins": [
+		"@typescript-eslint"
+	],
+	"rules": {
+		"indent": [
+			"error",
+			"tab",
+			{ "SwitchCase": 1 }
+		],
+		"quotes": ["error", "single"],
+		"semi": ["error", "always"],
+		"no-console": [
+			"warn",
+			{ "allow": ["warn", "error"] }
+		],
+		"no-template-curly-in-string": "error",
+		"init-declarations": ["error", "always"],
+		"no-label-var": "error",
+		"no-shadow": "error",
+		"no-use-before-define": "error",
+		"array-callback-return": "error",
+		"block-scoped-var": "error",
+		"complexity": [
+			"warn",
+			{ "max": 10 }
+		],
+		"default-param-last": "error",
+		"default-case-last": "error",
+		"dot-notation": "warn",
+		"eqeqeq": ["warn", "smart"],
+		"no-useless-return": "error",
+		"no-proto": "error",
+		"switch-colon-spacing": "error",
+		"keyword-spacing": "error",
+		"prefer-regex-literals": "warn",
+
+		"arrow-body-style": [
+			"warn",
+			"as-needed",
+			{ "requireReturnForObjectLiteral": true }
+		],
+		"arrow-parens": [
+			"warn",
+			"as-needed",
+			{ "requireForBlockBody": false }
+		],
+		"arrow-spacing": [
+			"error",
+			{
+				"before": true,
+				"after": true
+			}
+		],
+		"prefer-arrow-callback": [
+			"error",
+			{
+				"allowNamedFunctions": true,
+				"allowUnboundThis": false
+			}
+		],
+
+		"no-duplicate-imports": [
+			"error",
+			{ "includeExports": true }
+		],
+		"no-useless-computed-key": "error",
+		"no-useless-constructor": "error",
+		"no-var": "error",
+		"prefer-const": [
+			"error",
+			{
+        "destructuring": "any",
+        "ignoreReadBeforeAssign": true
+    	}
+		],
+		"object-shorthand": [
+			"error",
+			"always",
+			{
+				"avoidQuotes": true,
+				"ignoreConstructors": true,
+				"avoidExplicitReturnArrows": true
+			}
+		],
+
+		"array-bracket-spacing": ["error", "never"],
+		"block-spacing": ["error", "always"],
+		"brace-style": [
+			"error",
+			"1tbs",
+			{ "allowSingleLine": true }
+		],
+		"camelcase": "error",
+		"comma-spacing": "error",
+		"comma-style": "error",
+		"computed-property-spacing": "error",
+		"eol-last": "error",
+		"linebreak-style": ["error", "unix"],
+		"func-call-spacing": ["error", "never"],
+		"func-style": [
+			"error",
+			"declaration",
+			{ "allowArrowFunctions": true }
+		],
+		"function-call-argument-newline": ["error", "consistent"],
+		"function-paren-newline": ["error", "never"],
+		"implicit-arrow-linebreak": "error",
+		"max-len": [
+			"error",
+			{
+				"code": 120,
+				"tabWidth": 2
+			}
+		],
+		"no-trailing-spaces": "error"
+	},
+	"overrides": [
+		{
+			"files": ["*.ts"],
+			"rules": {
+				"@typescript-eslint/explicit-function-return-type": [
+					"error",
+					{
+						"allowExpressions": false,
+						"allowTypedFunctionExpressions": true,
+						"allowHigherOrderFunctions": false,
+						"allowConciseArrowFunctionExpressionsStartingWithVoid": true
+					}
+				],
+				"@typescript-eslint/explicit-member-accessibility": [
+					"error",
+					{
+						"accessibility": "explicit",
+						"overrides": {
+							"constructors": "no-public"
+						}
+					}
+				],
+				"@typescript-eslint/prefer-optional-chain": "warn"
+			}
+		}
+	]
 }
