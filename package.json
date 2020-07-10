@@ -17,6 +17,16 @@
 		"browser"
 	],
 	"main": "src/index.ts",
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	},
+	"lint-staged": {
+		"src/**/*.ts": [
+			"eslint --fix"
+		]
+	},
 	"scripts": {
 		"lint": "eslint --fix .",
 		"dev": "webpack-dev-server",
@@ -30,6 +40,8 @@
 		"clean-webpack-plugin": "^3.0.0",
 		"copy-webpack-plugin": "^6.0.2",
 		"eslint": "^7.3.1",
+		"husky": "^4.2.5",
+		"lint-staged": "^10.2.11",
 		"tsconfig-paths-webpack-plugin": "^3.2.0",
 		"tscpaths": "0.0.9",
 		"typescript": "^3.9.5",
