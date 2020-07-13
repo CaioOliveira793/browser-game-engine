@@ -14,22 +14,14 @@ class Input {
 
 	private static mousePosition = { x: 0, y: 0 };
 
-	public static isPressed(key: Key | MouseButtons): boolean {
-		return Input.codesPressed.has(key);
-	}
+	public static isPressed = (key: Key | MouseButtons): boolean => Input.codesPressed.has(key);
+	public static isReleased = (key: Key | MouseButtons): boolean => Input.codesReleased.has(key);
+	public static isTyped = (key: Key | MouseButtons): boolean => Input.codesTyped.has(key);
 
-	public static isReleased(key: Key | MouseButtons): boolean {
-		return Input.codesReleased.has(key);
-	}
-
-	public static isTyped(key: Key | MouseButtons): boolean {
-		return Input.codesTyped.has(key);
-	}
-
-	public static getMousePosition(): { x: number, y: number } { return Input.mousePosition; }
+	public static getMousePosition = (): { x: number, y: number } => Input.mousePosition;
 
 	// called each keyboard and mouse event:
-	public static update(e: InputEvents): void {
+	public static update = (e: InputEvents): void => {
 		if (e.type === EventType.KeyTyped || e.type === EventType.MouseButtonTyped) {
 			const key = e?.code ?? e?.button;
 
@@ -48,7 +40,7 @@ class Input {
 	}
 
 	// called each frame:
-	public static reset(): void {
+	public static reset = (): void => {
 		Input.codesTyped.clear();
 		Input.codesReleased.clear();
 	}

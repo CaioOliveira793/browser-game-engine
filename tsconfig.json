@@ -10,6 +10,8 @@
     "baseUrl": "./src",
     "paths": {},
     "strict": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
 		"preserveConstEnums": true,
 		"removeComments": true,
     "skipLibCheck": true,

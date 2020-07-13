@@ -38,7 +38,7 @@ export class EventDispatcher {
 		this.event = event;
 	}
 
-	dispatch = <T extends TypedEvents>(type: EventType, callback: EventCallback<T>): boolean => {
+	public dispatch = <T extends TypedEvents>(type: EventType, callback: EventCallback<T>): boolean => {
 		if (this.event.type === type && !this.event.handled) {
 			this.event.handled = callback(this.event as T);
 			return true;

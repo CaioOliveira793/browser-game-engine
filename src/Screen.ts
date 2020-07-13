@@ -38,14 +38,12 @@ export class Screen {
 		this.observer = new MutationObserver(this.handleScreenCloseMutationCallback);
 	}
 
-	public getWidth = (): number => { return this.canvas.width; }
-	public getHeight = (): number => { return this.canvas.height; }
+	public getWidth = (): number => this.canvas.width;
+	public getHeight = (): number => this.canvas.height;
 
-	public getContext = (): WebGLRenderingContext => { return this.context; }
+	public getContext = (): WebGLRenderingContext => this.context;
 
-	public setFullscreen = (): Promise<void> => {
-		return this.canvas.requestFullscreen({ navigationUI: 'hide' });
-	}
+	public setFullscreen = (): Promise<void> => this.canvas.requestFullscreen({ navigationUI: 'hide' });
 
 	public addEvents = (): void => {
 		const listenerOptions = {
@@ -112,7 +110,7 @@ export class Screen {
 		this.eventCallback(e);
 	}
 
-	private handleScreenCloseMutationCallback: MutationCallback = (): void => {
+	private handleScreenCloseMutationCallback = (): void => {
 		if (!document.contains(this.canvas)) {
 			const e = new ScreenCloseEvent();
 			this.eventCallback(e);
@@ -148,7 +146,8 @@ export class Screen {
 		};
 
 		const pressEvent = new KeyPressEvent(event.code as keyof typeof KeyCodeMapTable,
-			event.repeat, commandKeys);
+			event.repeat,
+			commandKeys);
 
 		if (!event.repeat) {
 			const typedEvent = new KeyTypedEvent(event.code as keyof typeof KeyCodeMapTable, commandKeys);
