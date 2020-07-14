@@ -1,8 +1,13 @@
+import VertexBuffer from './VertexBuffer';
+
+
 class Renderer {
 	private static ctx: WebGL2RenderingContext;
 
 	public static init = (context: WebGL2RenderingContext): void => {
 		Renderer.ctx = context;
+
+		VertexBuffer.init(context);
 	}
 
 	public static setViewport = (x: number, y: number, width: number, heigth: number): void => {
