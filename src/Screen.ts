@@ -3,11 +3,12 @@ import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent 
 import { KeyCodeMapTable } from './Inputs/KeyCodes';
 import { KeyPressEvent, KeyReleaseEvent, KeyTypedEvent } from './Events/KeyboardEvents';
 import { MouseButtonTypedEvent, MouseButtonReleaseEvent, MouseMoveEvent, MouseScrollEvent } from './Events/MouseEvents';
+import Renderer from './Renderer/Renderer';
 
 
 export class Screen {
 	private canvas: HTMLCanvasElement;
-	private context: WebGLRenderingContext;
+	private context: WebGL2RenderingContext;
 
 	private resolutionOffFullscreen: { width: number, height: number };
 
@@ -20,13 +21,15 @@ export class Screen {
 		this.canvas.height = height;
 		this.canvas.tabIndex = 0;
 
-		const webgl = canvas.getContext('webgl');
+		const webgl = canvas.getContext('webgl2');
 
 		if (webgl) {
 			this.context = webgl;
 		} else {
-			throw new Error('Your browser appears not support WebGL');
+			throw new Error('Your browser appears not support WebGL 2');
 		}
+
+		Renderer.init(this.context);
 
 		this.eventCallback = eventCallback;
 
@@ -41,7 +44,7 @@ export class Screen {
 	public getWidth = (): number => this.canvas.width;
 	public getHeight = (): number => this.canvas.height;
 
-	public getContext = (): WebGLRenderingContext => this.context;
+	public getContext = (): WebGL2RenderingContext => this.context;
 
 	public setFullscreen = (): Promise<void> => this.canvas.requestFullscreen({ navigationUI: 'hide' });
 
@@ -105,6 +108,8 @@ export class Screen {
 			this.canvas.width = this.resolutionOffFullscreen.width;
 			this.canvas.height = this.resolutionOffFullscreen.height;
 		}
+
+		Renderer.setViewport(0, 0, this.canvas.width, this.canvas.height);
 
 		const e = new ScreenResizeEvent(this.canvas.width, this.canvas.height);
 		this.eventCallback(e);
