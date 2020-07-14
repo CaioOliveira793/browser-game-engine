@@ -1,5 +1,6 @@
 import VertexBuffer from './VertexBuffer';
 import IndexBuffer from './IndexBuffer';
+import VertexArray from './VertexArray';
 
 
 class Renderer {
@@ -10,6 +11,7 @@ class Renderer {
 
 		VertexBuffer.init(context);
 		IndexBuffer.init(context);
+		VertexArray.init(context);
 	}
 
 	public static setViewport = (x: number, y: number, width: number, heigth: number): void => {
