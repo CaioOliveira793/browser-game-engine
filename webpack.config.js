@@ -37,6 +37,9 @@ module.exports = {
 			query: {
 				configFileName: 'sandbox/tsconfig.json'
 			}
+		}, {
+			test: /\.glsl$/,
+			loader: 'webpack-glsl-loader'
 		}]
 	},
 	devServer: {
