@@ -10,7 +10,7 @@ class IndexBuffer {
 	private readonly type: GLenum = 0;
 	private readonly indiceSize: number = 0;
 
-	constructor(indices: Uint8Array | Uint16Array | Uint32Array | BigUint64Array) {
+	constructor(indices: Uint8Array | Uint16Array | Uint32Array) {
 		this.id = IndexBuffer.ctx.createBuffer() as WebGLBuffer;
 
 		IndexBuffer.ctx.bindBuffer(IndexBuffer.ctx.ELEMENT_ARRAY_BUFFER, this.id);

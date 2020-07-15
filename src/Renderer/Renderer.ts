@@ -29,6 +29,7 @@ class Renderer {
 	}
 
 	public static drawVertexArray = (vertexArray: VertexArray, count?: number, offset = 0): void => {
+		vertexArray.bind();
 		const indexCount = count ?? vertexArray.getIndexBuffer().getCount();
 		Renderer.ctx.drawElements(Renderer.ctx.TRIANGLES, indexCount, vertexArray.getIndexBuffer().getType(), offset);
 	}

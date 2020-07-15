@@ -58,20 +58,19 @@ class VertexArray {
 				case ShaderDataType.Bool: {
 					VertexArray.ctx.enableVertexAttribArray(this.vertexBufferIndex);
 					VertexArray.ctx.vertexAttribPointer(this.vertexBufferIndex,
-						element.getComponentCount(),
+						element.componentCount,
 						VertexArray.shaderDataTypeToWebGLType(element.type),
 						element.normalized,
 						layout.getStride(),
 						element.offset);
 
 					this.vertexBufferIndex++;
-
 					break;
 				}
 
 				case ShaderDataType.Mat3:
 				case ShaderDataType.Mat4: {
-					const count = element.getComponentCount();
+					const count = element.componentCount;
 
 					for (let i = 1; i <= count; i++) {
 						VertexArray.ctx.enableVertexAttribArray(this.vertexBufferIndex);
@@ -94,12 +93,14 @@ class VertexArray {
 	public getIndexBuffer = (): IndexBuffer => this.indexBuffer as IndexBuffer;
 	public setIndexBuffer = (indexBuffer: IndexBuffer): void => {
 		VertexArray.ctx.bindVertexArray(this.id);
-
 		this.indexBuffer = indexBuffer;
 		this.indexBuffer.bind();
 	}
 
-	public bind = (): void => { VertexArray.ctx.bindVertexArray(this.id); }
+	public bind = (): void => {
+		VertexArray.ctx.bindVertexArray(this.id);
+		this.indexBuffer?.bind();
+	}
 	public delete = (): void => { VertexArray.ctx.deleteVertexArray(this.id); }
 }
 
