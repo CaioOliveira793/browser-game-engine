@@ -91,6 +91,7 @@ class VertexArray {
 		this.vertexBuffers.push(vertexBuffer);
 	}
 
+	public getIndexBuffer = (): IndexBuffer => this.indexBuffer as IndexBuffer;
 	public setIndexBuffer = (indexBuffer: IndexBuffer): void => {
 		VertexArray.ctx.bindVertexArray(this.id);
 
@@ -99,7 +100,6 @@ class VertexArray {
 	}
 
 	public bind = (): void => { VertexArray.ctx.bindVertexArray(this.id); }
-
 	public delete = (): void => { VertexArray.ctx.deleteVertexArray(this.id); }
 }
 
