@@ -27,6 +27,11 @@ class Renderer {
 	public static clear = (): void => {
 		Renderer.ctx.clear(Renderer.ctx.COLOR_BUFFER_BIT | Renderer.ctx.DEPTH_BUFFER_BIT);
 	}
+
+	public static drawVertexArray = (vertexArray: VertexArray, count?: number, offset = 0): void => {
+		const indexCount = count ?? vertexArray.getIndexBuffer().getCount();
+		Renderer.ctx.drawElements(Renderer.ctx.TRIANGLES, indexCount, vertexArray.getIndexBuffer().getType(), offset);
+	}
 }
 
 
