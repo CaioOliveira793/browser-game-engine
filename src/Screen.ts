@@ -34,15 +34,15 @@ export class Screen {
 		this.eventCallback = eventCallback;
 
 		this.resolutionOffFullscreen = {
-			width: this.canvas.width,
-			height: this.canvas.height
+			width: this.canvas.clientWidth,
+			height: this.canvas.clientHeight
 		};
 
 		this.observer = new MutationObserver(this.handleScreenCloseMutationCallback);
 	}
 
-	public getWidth = (): number => this.canvas.width;
-	public getHeight = (): number => this.canvas.height;
+	public getWidth = (): number => this.canvas.clientWidth;
+	public getHeight = (): number => this.canvas.clientHeight;
 
 	public getContext = (): WebGL2RenderingContext => this.context;
 
@@ -102,16 +102,16 @@ export class Screen {
 		event.stopImmediatePropagation();
 
 		if (document.fullscreen) {
-			this.canvas.width = window.innerWidth;
-			this.canvas.height = window.innerHeight;
+			this.canvas.width = this.canvas.clientWidth;
+			this.canvas.height = this.canvas.clientHeight;
 		} else {
 			this.canvas.width = this.resolutionOffFullscreen.width;
 			this.canvas.height = this.resolutionOffFullscreen.height;
 		}
 
-		Renderer.setViewport(0, 0, this.canvas.width, this.canvas.height);
+		Renderer.setViewport();
 
-		const e = new ScreenResizeEvent(this.canvas.width, this.canvas.height);
+		const e = new ScreenResizeEvent(this.canvas.clientWidth, this.canvas.clientHeight);
 		this.eventCallback(e);
 	}
 

@@ -16,8 +16,8 @@ class Renderer {
 		Shader.init(context);
 	}
 
-	public static setViewport = (x: number, y: number, width: number, heigth: number): void => {
-		Renderer.ctx.viewport(x, y, width, heigth);
+	public static setViewport = (x = 0, y = 0, width = Renderer.ctx.drawingBufferWidth, height = Renderer.ctx.drawingBufferHeight): void => {
+		Renderer.ctx.viewport(x, y, width, height);
 	}
 
 	public static setClearColor = (color: Float32Array): void => {
