@@ -10,8 +10,6 @@ export class Screen {
 	private canvas: HTMLCanvasElement;
 	private context: WebGL2RenderingContext;
 
-	private resolutionOffFullscreen: { width: number, height: number };
-
 	private observer: MutationObserver;
 	private eventCallback: (e: TypedEvents) => void;
 
@@ -32,12 +30,6 @@ export class Screen {
 		Renderer.init(this.context);
 
 		this.eventCallback = eventCallback;
-
-		this.resolutionOffFullscreen = {
-			width: this.canvas.clientWidth,
-			height: this.canvas.clientHeight
-		};
-
 		this.observer = new MutationObserver(this.handleScreenCloseMutationCallback);
 	}
 
@@ -45,8 +37,23 @@ export class Screen {
 	public getHeight = (): number => this.canvas.clientHeight;
 
 	public getContext = (): WebGL2RenderingContext => this.context;
+	public getCanvas = (): HTMLCanvasElement => this.canvas;
 
 	public setFullscreen = (): Promise<void> => this.canvas.requestFullscreen({ navigationUI: 'hide' });
+
+	public checkResize = (): void => {
+		const displayWidth  = this.canvas.clientWidth;
+		const displayHeight = this.canvas.clientHeight;
+
+		if (this.canvas.width  !== displayWidth || this.canvas.height !== displayHeight) {
+			this.canvas.width  = displayWidth;
+			this.canvas.height = displayHeight;
+			Renderer.setViewport();
+
+			const e = new ScreenResizeEvent(displayWidth, displayHeight);
+			this.eventCallback(e);
+		}
+	}
 
 	public addEvents = (): void => {
 		const listenerOptions = {
@@ -56,7 +63,6 @@ export class Screen {
 		};
 
 		// screen events:
-		this.canvas.addEventListener('fullscreenchange', this.handleFullScreen, listenerOptions);
 		this.canvas.addEventListener('focus', this.handleScreenFocus, listenerOptions);
 		this.canvas.addEventListener('blur', this.handleScreenBlur, listenerOptions);
 		this.observer.observe(this.canvas.parentElement as HTMLElement, { childList: true });
@@ -80,7 +86,6 @@ export class Screen {
 		};
 
 		// screen events:
-		this.canvas.removeEventListener('fullscreenchange', this.handleFullScreen, listenerOptions);
 		this.canvas.removeEventListener('focus', this.handleScreenFocus, listenerOptions);
 		this.canvas.removeEventListener('blur', this.handleScreenBlur, listenerOptions);
 		this.observer.disconnect();
@@ -97,24 +102,6 @@ export class Screen {
 	}
 
 	//// screen: //////////////////////////////////////////////////////
-	private handleFullScreen = (event: Event): void => {
-		event.preventDefault();
-		event.stopImmediatePropagation();
-
-		if (document.fullscreen) {
-			this.canvas.width = this.canvas.clientWidth;
-			this.canvas.height = this.canvas.clientHeight;
-		} else {
-			this.canvas.width = this.resolutionOffFullscreen.width;
-			this.canvas.height = this.resolutionOffFullscreen.height;
-		}
-
-		Renderer.setViewport();
-
-		const e = new ScreenResizeEvent(this.canvas.clientWidth, this.canvas.clientHeight);
-		this.eventCallback(e);
-	}
-
 	private handleScreenCloseMutationCallback = (): void => {
 		if (!document.contains(this.canvas)) {
 			const e = new ScreenCloseEvent();

@@ -74,6 +74,8 @@ abstract class Application {
 		const deltaTime = time - this.previousTime;
 		this.previousTime = time;
 
+		this.screen.checkResize();
+
 		Input.reset();
 		this.eventQueue.forEach(event => this.eventPropagator(event));
 		this.eventQueue.clear();
