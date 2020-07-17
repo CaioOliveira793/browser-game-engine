@@ -3,6 +3,7 @@ import MouseButtons from './MouseCodes';
 import { EventType } from '../Events/Events';
 import { KeyTypedEvent } from '../Events/KeyboardEvents';
 import { MouseButtonTypedEvent, MouseMoveEvent } from '../Events/MouseEvents';
+import { ScreenBlurEvent } from '../Events/ScreenEvents';
 
 
 export type InputEvents = MouseButtonTypedEvent & MouseMoveEvent & KeyTypedEvent;
@@ -21,7 +22,7 @@ class Input {
 	public static getMousePosition = (): { x: number, y: number } => Input.mousePosition;
 
 	// called each keyboard and mouse event:
-	public static update = (e: InputEvents): void => {
+	public static updateKeysAndButtons = (e: InputEvents): void => {
 		if (e.type === EventType.KeyTyped || e.type === EventType.MouseButtonTyped) {
 			const key = e?.code ?? e?.button;
 
@@ -36,6 +37,14 @@ class Input {
 
 		} else if (e.type === EventType.MouseMove) {
 			Input.mousePosition = e.position;
+		}
+	}
+
+	public static updateScreenBlur = (e: ScreenBlurEvent): void => {
+		if (e.type === EventType.ScreenBlur) {
+			Input.codesTyped.clear();
+			Input.codesReleased.clear();
+			Input.codesPressed.clear();
 		}
 	}
 
