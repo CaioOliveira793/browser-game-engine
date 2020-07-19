@@ -21,9 +21,10 @@ class Renderer {
 		// finish the scene and draw everything
 	}
 
-	public static submit = (shader: Shader, vertexArray: VertexArray): void => {
+	public static submit = (shader: Shader, vertexArray: VertexArray, transform = Mat4.create()): void => {
 		shader.bind();
 		shader.uploadUniformMat4('u_viewProjection', Renderer.viewProjectionMatrix);
+		shader.uploadUniformMat4('u_transform', transform);
 		RendererCommand.drawIndexed(shader, vertexArray);
 	}
 

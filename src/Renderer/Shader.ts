@@ -1,3 +1,13 @@
+interface UniformBlockInfo {
+	readonly bind: number;
+	readonly size: number;
+	readonly uniformsCount: number;
+	readonly uniformsIndices: Uint32Array;
+	readonly inVertex: boolean;
+	readonly inFragment: boolean;
+}
+
+
 class Shader {
 	private static ctx: WebGL2RenderingContext;
 
@@ -6,7 +16,8 @@ class Shader {
 
 	private id: WebGLProgram = 0;
 
-	private uniforms: Map<string, { type: number, location: WebGLUniformLocation }>
+	private readonly uniforms = new Map<string, { type: number, location: WebGLUniformLocation }>();
+	private readonly uniformsBlock = new Map<string, UniformBlockInfo>();
 
 	constructor(vertexSrc: string, fragmentSrc: string) {
 		this.compile(new Map([
@@ -14,8 +25,23 @@ class Shader {
 			[Shader.ctx.FRAGMENT_SHADER, fragmentSrc]
 		]));
 
-		this.uniforms = new Map();
 		const uniformCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORMS);
+		const uniformBlockCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORM_BLOCKS);
+
+		for (let i = 0; i < uniformBlockCount; i++) {
+			Shader.ctx.uniformBlockBinding(this.id, i, i);
+
+			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, i) as string, {
+				bind: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_BINDING),
+				size: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE),
+				uniformsCount: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORMS),
+				uniformsIndices: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
+				inVertex: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
+				inFragment: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER)
+			});
+		}
+
+		console.log(this.uniformsBlock);
 
 		for (let i = 0; i < uniformCount; i++) {
 			const uniform = Shader.ctx.getActiveUniform(this.id, i) as WebGLActiveInfo;
