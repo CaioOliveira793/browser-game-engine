@@ -48,7 +48,7 @@ export class Screen {
 		if (this.canvas.width  !== displayWidth || this.canvas.height !== displayHeight) {
 			this.canvas.width  = displayWidth;
 			this.canvas.height = displayHeight;
-			Renderer.setViewport();
+			Renderer.onScreenResize(displayWidth, displayHeight);
 
 			const e = new ScreenResizeEvent(displayWidth, displayHeight);
 			this.eventCallback(e);

@@ -1,38 +1,38 @@
-import VertexBuffer from './VertexBuffer';
-import IndexBuffer from './IndexBuffer';
-import VertexArray from './VertexArray';
+import { mat4 as Mat4 } from 'gl-matrix';
+import RendererCommand from './RendererCommand';
 import Shader from './Shader';
+import VertexArray from './VertexArray';
+import { OrthographicCamera } from './Camera';
 
 
 class Renderer {
-	private static ctx: WebGL2RenderingContext;
+	private static aspectRatio: number;
+	private static viewProjectionMatrix: Mat4;
 
 	public static init = (context: WebGL2RenderingContext): void => {
-		Renderer.ctx = context;
-
-		VertexBuffer.init(context);
-		IndexBuffer.init(context);
-		VertexArray.init(context);
-		Shader.init(context);
+		RendererCommand.init(context);
 	}
 
-	public static setViewport = (x = 0, y = 0, width = Renderer.ctx.drawingBufferWidth, height = Renderer.ctx.drawingBufferHeight): void => {
-		Renderer.ctx.viewport(x, y, width, height);
+	public static beginScene = (camera: OrthographicCamera): void => {
+		Renderer.viewProjectionMatrix = camera.getViewProjectionMatrix();
 	}
 
-	public static setClearColor = (color: Float32Array): void => {
-		Renderer.ctx.clearColor(color[0], color[1], color[2], color[3]);
+	public static endScene = (): void => {
+		// finish the scene and draw everything
 	}
 
-	public static clear = (): void => {
-		Renderer.ctx.clear(Renderer.ctx.COLOR_BUFFER_BIT | Renderer.ctx.DEPTH_BUFFER_BIT);
+	public static submit = (shader: Shader, vertexArray: VertexArray): void => {
+		shader.bind();
+		shader.uploadUniformMat4('u_viewProjection', Renderer.viewProjectionMatrix);
+		RendererCommand.drawIndexed(shader, vertexArray);
 	}
 
-	public static drawVertexArray = (vertexArray: VertexArray, count?: number, offset = 0): void => {
-		vertexArray.bind();
-		const indexCount = count ?? vertexArray.getIndexBuffer().getCount();
-		Renderer.ctx.drawElements(Renderer.ctx.TRIANGLES, indexCount, vertexArray.getIndexBuffer().getType(), offset);
+	public static onScreenResize = (width: number, height: number): void => {
+		RendererCommand.setViewport();
+		Renderer.aspectRatio = width / height;
 	}
+
+	public static getAspectRatio = (): number => Renderer.aspectRatio;
 }
 
 

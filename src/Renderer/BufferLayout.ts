@@ -59,12 +59,12 @@ export interface BufferElement {
 }
 
 export class BufferLayout {
-	private elements: BufferElement[];
-	private stride: number;
+	public readonly elements: BufferElement[];
+	public readonly stride: number;
 
 	constructor(elements: { type: ShaderDataType, normalized?: boolean }[]) {
 		let offset = 0;
-		this.stride = 0;
+		let stride = 0;
 
 		this.elements = elements.map(element => {
 			const size = shaderDataTypeToSize(element.type);
@@ -78,14 +78,12 @@ export class BufferLayout {
 			};
 
 			offset += size;
-			this.stride += size;
-
+			stride += size;
 			return el;
 		});
-	}
 
-	public getElements = (): BufferElement[] => this.elements;
-	public getStride = (): number => this.stride;
+		this.stride = stride;
+	}
 }
 
 

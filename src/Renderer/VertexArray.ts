@@ -45,7 +45,7 @@ class VertexArray {
 		vertexBuffer.bind();
 
 		const layout = vertexBuffer.getLayout();
-		layout.getElements().forEach(element => {
+		layout.elements.forEach(element => {
 			switch (element.type) {
 				case ShaderDataType.Float:
 				case ShaderDataType.Float2:
@@ -61,7 +61,7 @@ class VertexArray {
 						element.componentCount,
 						VertexArray.shaderDataTypeToWebGLType(element.type),
 						element.normalized,
-						layout.getStride(),
+						layout.stride,
 						element.offset);
 
 					this.vertexBufferIndex++;
@@ -78,7 +78,7 @@ class VertexArray {
 							count,
 							VertexArray.shaderDataTypeToWebGLType(element.type),
 							element.normalized,
-							layout.getStride(),
+							layout.stride,
 							element.offset - (count * 4 * i));
 
 						this.vertexBufferIndex++;
