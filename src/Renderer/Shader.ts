@@ -1,6 +1,7 @@
+import UniformBuffer from './UniformBuffer';
+
 interface UniformBlockInfo {
 	readonly index: number;
-	readonly bufferId: WebGLBuffer;
 	readonly size: number;
 	readonly uniformsCount: number;
 	readonly uniformsIndices: Uint32Array;
@@ -32,13 +33,8 @@ class Shader {
 
 			const size = Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE);
 
-			const bufferId = Shader.ctx.createBuffer() as WebGLBuffer;
-			Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, bufferId);
-			Shader.ctx.bufferData(Shader.ctx.UNIFORM_BUFFER, size, Shader.ctx.DYNAMIC_DRAW);
-
 			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, blockIndex) as string, {
 				index: blockIndex,
-				bufferId,
 				size,
 				uniformsCount: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORMS),
 				uniformsIndices: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
@@ -122,11 +118,10 @@ class Shader {
 		Shader.ctx.uniformMatrix4fv(this.uniforms.get(name)?.location as WebGLUniformLocation, false, mat4);
 	}
 
-	public uploadUniformBuffer = (name: string, buffer: ArrayBuffer): void => {
+	public uploadUniformBuffer = (name: string, uniformBuffer: UniformBuffer): void => {
 		const blockInfo = this.uniformsBlock.get(name) as UniformBlockInfo;
-		Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, blockInfo.bufferId);
-		Shader.ctx.bufferSubData(Shader.ctx.UNIFORM_BUFFER, 0, buffer);
-		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo.index, blockInfo.bufferId);
+		uniformBuffer.bind();
+		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo.index, uniformBuffer.id);
 	}
 
 

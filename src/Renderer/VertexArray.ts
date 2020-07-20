@@ -45,7 +45,7 @@ class VertexArray {
 		vertexBuffer.bind();
 
 		const layout = vertexBuffer.getLayout();
-		layout.elements.forEach(element => {
+		layout.forEach(element => {
 			switch (element.type) {
 				case ShaderDataType.Float:
 				case ShaderDataType.Float2:

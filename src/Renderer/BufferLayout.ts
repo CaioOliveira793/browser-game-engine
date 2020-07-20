@@ -58,28 +58,27 @@ export interface BufferElement {
 	componentCount: number;
 }
 
-export class BufferLayout {
-	public readonly elements: BufferElement[];
+export class BufferLayout extends Array<BufferElement> {
 	public readonly stride: number;
 
 	constructor(elements: { type: ShaderDataType, normalized?: boolean }[]) {
+		super(elements.length);
 		let offset = 0;
 		let stride = 0;
 
-		this.elements = elements.map(element => {
+		elements.forEach(element => {
 			const size = shaderDataTypeToSize(element.type);
 
-			const el = {
+			super.push({
 				type: element.type,
 				normalized: !!element.normalized,
 				componentCount: shaderDataTypeTocomponentCount(element.type),
 				size,
 				offset
-			};
+			});
 
 			offset += size;
 			stride += size;
-			return el;
 		});
 
 		this.stride = stride;

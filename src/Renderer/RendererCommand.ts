@@ -1,5 +1,6 @@
 import VertexBuffer from './VertexBuffer';
 import IndexBuffer from './IndexBuffer';
+import UniformBuffer from './UniformBuffer';
 import VertexArray from './VertexArray';
 import Shader from './Shader';
 
@@ -12,6 +13,7 @@ class RendererCommand {
 
 		VertexBuffer.init(context);
 		IndexBuffer.init(context);
+		UniformBuffer.init(context);
 		VertexArray.init(context);
 		Shader.init(context);
 	}
