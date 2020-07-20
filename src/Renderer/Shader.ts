@@ -1,5 +1,5 @@
 interface UniformBlockInfo {
-	readonly bind: number;
+	readonly index: number;
 	readonly bufferId: WebGLBuffer;
 	readonly size: number;
 	readonly uniformsCount: number;
@@ -11,7 +11,6 @@ interface UniformBlockInfo {
 
 class Shader {
 	private static ctx: WebGL2RenderingContext;
-
 	public static init = (context: WebGL2RenderingContext): void => { Shader.ctx = context; }
 
 
@@ -26,56 +25,44 @@ class Shader {
 			[Shader.ctx.FRAGMENT_SHADER, fragmentSrc]
 		]));
 
-		const uniformCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORMS);
 		const uniformBlockCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORM_BLOCKS);
 
-		for (let i = 0; i < uniformBlockCount; i++) {
-			Shader.ctx.uniformBlockBinding(this.id, i, i);
+		for (let blockIndex = 0; blockIndex < uniformBlockCount; blockIndex++) {
+			Shader.ctx.uniformBlockBinding(this.id, blockIndex, blockIndex);
 
-			const size = Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE);
+			const size = Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE);
 
 			const bufferId = Shader.ctx.createBuffer() as WebGLBuffer;
-			Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, bufferId as WebGLBuffer);
+			Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, bufferId);
 			Shader.ctx.bufferData(Shader.ctx.UNIFORM_BUFFER, size, Shader.ctx.DYNAMIC_DRAW);
 
-			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, i) as string, {
-				bind: i,
+			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, blockIndex) as string, {
+				index: blockIndex,
 				bufferId,
 				size,
-				uniformsCount: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORMS),
-				uniformsIndices: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
-				inVertex: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
-				inFragment: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER)
+				uniformsCount: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORMS),
+				uniformsIndices: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
+				inVertex: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
+				inFragment: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER)
 			});
 		}
 
+		const uniformCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORMS);
+
 		for (let i = 0; i < uniformCount; i++) {
 			const uniform = Shader.ctx.getActiveUniform(this.id, i) as WebGLActiveInfo;
+			const location = Shader.ctx.getUniformLocation(this.id, uniform.name) as WebGLUniformLocation;
 
-			this.uniforms.set(uniform.name,
-				{
-					type: uniform.type,
-					location: Shader.ctx.getUniformLocation(this.id, uniform.name) as WebGLUniformLocation
-				});
+			this.uniforms.set(uniform.name, { type: uniform.type, location });
 		}
 	}
 
 	public bind = (): void => { Shader.ctx.useProgram(this.id); }
 	public delete = (): void => { Shader.ctx.deleteProgram(this.id); }
 
-	public uploadUniformFloat = (name: string, f1: number): void => {
-		Shader.ctx.uniform1f(this.uniforms.get(name)?.location as WebGLUniformLocation, f1);
+	public uploadUniformFloat = (name: string, float: number | Float32Array | number[]): void => {
+		Shader.ctx.uniform1fv(this.uniforms.get(name)?.location as WebGLUniformLocation, float as Float32Array);
 	}
-	public uploadUniformFloat2 = (name: string, f1: number, f2: number): void => {
-		Shader.ctx.uniform2f(this.uniforms.get(name)?.location as WebGLUniformLocation, f1, f2);
-	}
-	public uploadUniformFloat3 = (name: string, f1: number, f2: number, f3: number): void => {
-		Shader.ctx.uniform3f(this.uniforms.get(name)?.location as WebGLUniformLocation, f1, f2, f3);
-	}
-	public uploadUniformFloat4 = (name: string, f1: number, f2: number, f3: number, f4: number): void => {
-		Shader.ctx.uniform4f(this.uniforms.get(name)?.location as WebGLUniformLocation, f1, f2, f3, f4);
-	}
-
 	public uploadUniformVec2 = (name: string, vec2: Float32Array | number[]): void => {
 		Shader.ctx.uniform2fv(this.uniforms.get(name)?.location as WebGLUniformLocation, vec2);
 	}
@@ -86,19 +73,9 @@ class Shader {
 		Shader.ctx.uniform4fv(this.uniforms.get(name)?.location as WebGLUniformLocation, vec4);
 	}
 
-	public uploadUniformInt = (name: string, i1: number): void => {
-		Shader.ctx.uniform1i(this.uniforms.get(name)?.location as WebGLUniformLocation, i1);
+	public uploadUniformInt = (name: string, int: number | Int32Array | number[]): void => {
+		Shader.ctx.uniform1iv(this.uniforms.get(name)?.location as WebGLUniformLocation, int as Int32Array);
 	}
-	public uploadUniformInt2 = (name: string, i1: number, i2: number): void => {
-		Shader.ctx.uniform2i(this.uniforms.get(name)?.location as WebGLUniformLocation, i1, i2);
-	}
-	public uploadUniformInt3 = (name: string, i1: number, i2: number, i3: number): void => {
-		Shader.ctx.uniform3i(this.uniforms.get(name)?.location as WebGLUniformLocation, i1, i2, i3);
-	}
-	public uploadUniformInt4 = (name: string, i1: number, i2: number, i3: number, i4: number): void => {
-		Shader.ctx.uniform4i(this.uniforms.get(name)?.location as WebGLUniformLocation, i1, i2, i3, i4);
-	}
-
 	public uploadUniformIVec2 = (name: string, ivec2: Int32Array | number[]): void => {
 		Shader.ctx.uniform2iv(this.uniforms.get(name)?.location as WebGLUniformLocation, ivec2);
 	}
@@ -109,19 +86,9 @@ class Shader {
 		Shader.ctx.uniform4iv(this.uniforms.get(name)?.location as WebGLUniformLocation, ivec4);
 	}
 
-	public uploadUniformUInt = (name: string, ui1: number): void => {
-		Shader.ctx.uniform1ui(this.uniforms.get(name)?.location as WebGLUniformLocation, ui1);
+	public uploadUniformUInt = (name: string, uint: number | Uint32Array | number[]): void => {
+		Shader.ctx.uniform1uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uint as Uint32Array);
 	}
-	public uploadUniformUInt2 = (name: string, ui1: number, ui2: number): void => {
-		Shader.ctx.uniform2ui(this.uniforms.get(name)?.location as WebGLUniformLocation, ui1, ui2);
-	}
-	public uploadUniformUInt3 = (name: string, ui1: number, ui2: number, ui3: number): void => {
-		Shader.ctx.uniform3ui(this.uniforms.get(name)?.location as WebGLUniformLocation, ui1, ui2, ui3);
-	}
-	public uploadUniformUInt4 = (name: string, ui1: number, ui2: number, ui3: number, ui4: number): void => {
-		Shader.ctx.uniform4ui(this.uniforms.get(name)?.location as WebGLUniformLocation, ui1, ui2, ui3, ui4);
-	}
-
 	public uploadUniformUVec2 = (name: string, uvec2: Uint32Array | number[]): void => {
 		Shader.ctx.uniform2uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uvec2);
 	}
@@ -132,28 +99,9 @@ class Shader {
 		Shader.ctx.uniform4uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uvec4);
 	}
 
-	public uploadUniformBool = (name: string, b1: boolean): void => {
-		Shader.ctx.uniform1ui(this.uniforms.get(name)?.location as WebGLUniformLocation, b1 as unknown as number);
+	public uploadUniformBool = (name: string, bool: boolean | Uint32Array | number[]): void => {
+		Shader.ctx.uniform1uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, bool as Uint32Array);
 	}
-	public uploadUniformBool2 = (name: string, b1: boolean, b2: boolean): void => {
-		Shader.ctx.uniform2ui(this.uniforms.get(name)?.location as WebGLUniformLocation,
-			b1 as unknown as number,
-			b2 as unknown as number);
-	}
-	public uploadUniformBool3 = (name: string, b1: boolean, b2: boolean, b3: boolean): void => {
-		Shader.ctx.uniform3ui(this.uniforms.get(name)?.location as WebGLUniformLocation,
-			b1 as unknown as number,
-			b2 as unknown as number,
-			b3 as unknown as number);
-	}
-	public uploadUniformBool4 = (name: string, b1: boolean, b2: boolean, b3: boolean, b4: boolean): void => {
-		Shader.ctx.uniform4ui(this.uniforms.get(name)?.location as WebGLUniformLocation,
-			b1 as unknown as number,
-			b2 as unknown as number,
-			b3 as unknown as number,
-			b4 as unknown as number);
-	}
-
 	public uploadUniformBVec2 = (name: string, bvec2: Uint32Array | boolean[]): void => {
 		Shader.ctx.uniform2uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, bvec2 as unknown as number[]);
 	}
@@ -175,10 +123,10 @@ class Shader {
 	}
 
 	public uploadUniformBuffer = (name: string, buffer: ArrayBuffer): void => {
-		const blockInfo = this.uniformsBlock.get(name);
-		Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, blockInfo?.bufferId as WebGLBuffer);
+		const blockInfo = this.uniformsBlock.get(name) as UniformBlockInfo;
+		Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, blockInfo.bufferId);
 		Shader.ctx.bufferSubData(Shader.ctx.UNIFORM_BUFFER, 0, buffer);
-		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo?.bind as number, blockInfo?.bufferId as WebGLBuffer);
+		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo.index, blockInfo.bufferId);
 	}
 
 
