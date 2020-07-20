@@ -9,12 +9,15 @@ class Renderer {
 	private static aspectRatio: number;
 	private static viewProjectionMatrix: Mat4;
 
+	private static sceneData = new ArrayBuffer(64);
+
 	public static init = (context: WebGL2RenderingContext): void => {
 		RendererCommand.init(context);
 	}
 
 	public static beginScene = (camera: OrthographicCamera): void => {
 		Renderer.viewProjectionMatrix = camera.getViewProjectionMatrix();
+		(new Float32Array(Renderer.sceneData)).set(Renderer.viewProjectionMatrix);
 	}
 
 	public static endScene = (): void => {
@@ -23,7 +26,7 @@ class Renderer {
 
 	public static submit = (shader: Shader, vertexArray: VertexArray, transform = Mat4.create()): void => {
 		shader.bind();
-		shader.uploadUniformMat4('u_viewProjection', Renderer.viewProjectionMatrix);
+		shader.uploadUniformBuffer('ub_scene', Renderer.sceneData);
 		shader.uploadUniformMat4('u_transform', transform);
 		RendererCommand.drawIndexed(shader, vertexArray);
 	}

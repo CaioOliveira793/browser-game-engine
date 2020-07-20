@@ -92,7 +92,8 @@ export class OrthographicCamera {
 		Mat4.translate(transform, Mat4.create(), this.position);
 		Mat4.rotateX(transform, transform, glMatrix.toRadian(this.rotation[0]));
 		Mat4.rotateY(transform, transform, glMatrix.toRadian(this.rotation[1]));
-		Mat4.rotateZ(this.viewMatrix, transform, glMatrix.toRadian(this.rotation[2]));
+		Mat4.rotateZ(transform, transform, glMatrix.toRadian(this.rotation[2]));
+		Mat4.invert(this.viewMatrix, transform);
 
 		Mat4.multiply(this.viewProjectionMatrix, this.projectionMatrix, this.viewMatrix);
 	}

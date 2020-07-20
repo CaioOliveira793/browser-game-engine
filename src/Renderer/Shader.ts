@@ -1,5 +1,6 @@
 interface UniformBlockInfo {
 	readonly bind: number;
+	readonly bufferId: WebGLBuffer;
 	readonly size: number;
 	readonly uniformsCount: number;
 	readonly uniformsIndices: Uint32Array;
@@ -31,17 +32,22 @@ class Shader {
 		for (let i = 0; i < uniformBlockCount; i++) {
 			Shader.ctx.uniformBlockBinding(this.id, i, i);
 
+			const size = Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE);
+
+			const bufferId = Shader.ctx.createBuffer() as WebGLBuffer;
+			Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, bufferId as WebGLBuffer);
+			Shader.ctx.bufferData(Shader.ctx.UNIFORM_BUFFER, size, Shader.ctx.DYNAMIC_DRAW);
+
 			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, i) as string, {
-				bind: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_BINDING),
-				size: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE),
+				bind: i,
+				bufferId,
+				size,
 				uniformsCount: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORMS),
 				uniformsIndices: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
 				inVertex: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
 				inFragment: Shader.ctx.getActiveUniformBlockParameter(this.id, i, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER)
 			});
 		}
-
-		console.log(this.uniformsBlock);
 
 		for (let i = 0; i < uniformCount; i++) {
 			const uniform = Shader.ctx.getActiveUniform(this.id, i) as WebGLActiveInfo;
@@ -166,6 +172,13 @@ class Shader {
 	}
 	public uploadUniformMat4 = (name: string, mat4: Float32Array | number[]): void => {
 		Shader.ctx.uniformMatrix4fv(this.uniforms.get(name)?.location as WebGLUniformLocation, false, mat4);
+	}
+
+	public uploadUniformBuffer = (name: string, buffer: ArrayBuffer): void => {
+		const blockInfo = this.uniformsBlock.get(name);
+		Shader.ctx.bindBuffer(Shader.ctx.UNIFORM_BUFFER, blockInfo?.bufferId as WebGLBuffer);
+		Shader.ctx.bufferSubData(Shader.ctx.UNIFORM_BUFFER, 0, buffer);
+		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo?.bind as number, blockInfo?.bufferId as WebGLBuffer);
 	}
 
 
