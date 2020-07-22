@@ -1,23 +1,37 @@
 import UniformBuffer from './UniformBuffer';
 
-interface UniformBlockInfo {
+export interface UniformInUniformBlock {
+	readonly type: number;
+	readonly count: number;
+	readonly offset: number;
+	readonly arrayStride: number;
+	readonly matrixStride: number;
+}
+
+export interface UniformBlockInfo {
 	readonly index: number;
 	readonly size: number;
-	readonly uniformsCount: number;
 	readonly uniformsIndices: Uint32Array;
+	readonly uniforms: Map<string, UniformInUniformBlock>;
 	readonly inVertex: boolean;
 	readonly inFragment: boolean;
 }
 
+export interface UniformsInfo {
+	readonly type: number;
+	readonly count: number;
+	readonly location: WebGLUniformLocation;
+}
 
-class Shader {
+
+export class Shader {
 	private static ctx: WebGL2RenderingContext;
 	public static init = (context: WebGL2RenderingContext): void => { Shader.ctx = context; }
 
 
 	private id: WebGLProgram = 0;
 
-	private readonly uniforms = new Map<string, { type: number, location: WebGLUniformLocation }>();
+	private readonly uniforms = new Map<string, UniformsInfo>();
 	private readonly uniformsBlock = new Map<string, UniformBlockInfo>();
 
 	constructor(vertexSrc: string, fragmentSrc: string) {
@@ -26,35 +40,15 @@ class Shader {
 			[Shader.ctx.FRAGMENT_SHADER, fragmentSrc]
 		]));
 
-		const uniformBlockCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORM_BLOCKS);
-
-		for (let blockIndex = 0; blockIndex < uniformBlockCount; blockIndex++) {
-			Shader.ctx.uniformBlockBinding(this.id, blockIndex, blockIndex);
-
-			const size = Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE);
-
-			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, blockIndex) as string, {
-				index: blockIndex,
-				size,
-				uniformsCount: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORMS),
-				uniformsIndices: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES),
-				inVertex: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
-				inFragment: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER)
-			});
-		}
-
-		const uniformCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORMS);
-
-		for (let i = 0; i < uniformCount; i++) {
-			const uniform = Shader.ctx.getActiveUniform(this.id, i) as WebGLActiveInfo;
-			const location = Shader.ctx.getUniformLocation(this.id, uniform.name) as WebGLUniformLocation;
-
-			this.uniforms.set(uniform.name, { type: uniform.type, location });
-		}
+		this.queryUniformBlockInfos();
+		this.queryUniformsInfos();
 	}
 
 	public bind = (): void => { Shader.ctx.useProgram(this.id); }
 	public delete = (): void => { Shader.ctx.deleteProgram(this.id); }
+
+	public getUniformBlocksInfo = (): Map<string, UniformBlockInfo> => this.uniformsBlock;
+	public getUniformsInfo = (): Map<string, UniformsInfo> => this.uniforms;
 
 	public uploadUniformFloat = (name: string, float: number | Float32Array | number[]): void => {
 		Shader.ctx.uniform1fv(this.uniforms.get(name)?.location as WebGLUniformLocation, float as Float32Array);
@@ -95,7 +89,7 @@ class Shader {
 		Shader.ctx.uniform4uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uvec4);
 	}
 
-	public uploadUniformBool = (name: string, bool: boolean | Uint32Array | number[]): void => {
+	public uploadUniformBool = (name: string, bool: boolean | Uint32Array | boolean[]): void => {
 		Shader.ctx.uniform1uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, bool as Uint32Array);
 	}
 	public uploadUniformBVec2 = (name: string, bvec2: Uint32Array | boolean[]): void => {
@@ -145,6 +139,64 @@ class Shader {
 			Shader.ctx.detachShader(this.id, shader);
 			Shader.ctx.deleteShader(shader);
 		});
+	}
+
+	private queryUniformsInUniformBlock = (uniformIndices: number[]): Map<string, UniformInUniformBlock> => {
+		const types = Shader.ctx.getActiveUniforms(this.id, uniformIndices, Shader.ctx.UNIFORM_TYPE);
+		const count = Shader.ctx.getActiveUniforms(this.id, uniformIndices, Shader.ctx.UNIFORM_SIZE);
+		const offsets = Shader.ctx.getActiveUniforms(this.id, uniformIndices, Shader.ctx.UNIFORM_OFFSET);
+		const arrayStrides = Shader.ctx.getActiveUniforms(this.id, uniformIndices, Shader.ctx.UNIFORM_ARRAY_STRIDE);
+		const matrixStrides = Shader.ctx.getActiveUniforms(this.id, uniformIndices, Shader.ctx.UNIFORM_MATRIX_STRIDE);
+
+		const uniforms = new Map<string, UniformInUniformBlock>();
+
+		uniformIndices.forEach((indice, i) => {
+			const name = Shader.ctx.getActiveUniform(this.id, indice)?.name as string;
+
+			uniforms.set(name, {
+				type: types[i],
+				count: count[i],
+				offset: offsets[i],
+				arrayStride: arrayStrides[i],
+				matrixStride: matrixStrides[i]
+			});
+		});
+
+		return uniforms;
+	}
+
+	private queryUniformBlockInfos = (): void => {
+		const uniformBlockCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORM_BLOCKS);
+
+		for (let blockIndex = 0; blockIndex < uniformBlockCount; blockIndex++) {
+			Shader.ctx.uniformBlockBinding(this.id, blockIndex, blockIndex);
+
+			const size = Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_DATA_SIZE);
+			const uniformsIndices = Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_ACTIVE_UNIFORM_INDICES) as Uint32Array;
+
+			const uniforms = this.queryUniformsInUniformBlock(uniformsIndices as unknown as number[]);
+
+			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, blockIndex) as string, {
+				index: blockIndex,
+				size,
+				uniformsIndices,
+				uniforms,
+				inVertex: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_VERTEX_SHADER),
+				inFragment: Shader.ctx.getActiveUniformBlockParameter(this.id, blockIndex, Shader.ctx.UNIFORM_BLOCK_REFERENCED_BY_FRAGMENT_SHADER)
+			});
+		}
+	}
+
+	private queryUniformsInfos = (): void => {
+		const uniformCount = Shader.ctx.getProgramParameter(this.id, Shader.ctx.ACTIVE_UNIFORMS);
+
+		for (let i = 0; i < uniformCount; i++) {
+			const uniform = Shader.ctx.getActiveUniform(this.id, i) as WebGLActiveInfo;
+			const location = Shader.ctx.getUniformLocation(this.id, uniform.name) as WebGLUniformLocation;
+
+			if (location)
+				this.uniforms.set(uniform.name, { type: uniform.type, location, count: uniform.size });
+		}
 	}
 }
 
