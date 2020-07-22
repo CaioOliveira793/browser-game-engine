@@ -13,10 +13,10 @@ export class OrthographicCamera {
 	private zoomLevel: number;
 	private aspectRatio: number;
 
-	constructor(width: number, aspectRatio: number, zoomLevel: number) {
+	constructor(width: number, aspectRatio: number, zoomLevel?: number) {
 		this.width = width;
 		this.aspectRatio = aspectRatio;
-		this.zoomLevel = zoomLevel;
+		this.zoomLevel = zoomLevel ?? width;
 		Mat4.ortho(this.projectionMatrix,
 			-this.aspectRatio * this.width,
 			this.aspectRatio * this.width,

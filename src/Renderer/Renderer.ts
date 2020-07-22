@@ -1,9 +1,9 @@
 import { mat4 as Mat4 } from 'gl-matrix';
 import RendererCommand from './RendererCommand';
-import Shader from './Shader';
 import VertexArray from './VertexArray';
 import UniformBuffer from './UniformBuffer';
 import { OrthographicCamera } from './Camera';
+import { MaterialInstance } from './Material';
 
 
 class SceneData {
@@ -43,11 +43,11 @@ class Renderer {
 		// Renderer.uniformBufferSceneData.delete();
 	}
 
-	public static submit = (shader: Shader, vertexArray: VertexArray, transform = Mat4.create()): void => {
-		shader.bind();
-		shader.uploadUniformBuffer('ub_Scene', Renderer.uniformBufferSceneData);
-		shader.uploadUniformMat4('u_Transform', transform);
-		RendererCommand.drawIndexed(shader, vertexArray);
+	public static submit = (material: MaterialInstance, vertexArray: VertexArray, transform = Mat4.create()): void => {
+		material.upload();
+		material.getShader().uploadUniformBuffer('ub_Scene', Renderer.uniformBufferSceneData);
+		material.getShader().uploadUniformMat4('u_Transform', transform);
+		RendererCommand.drawIndexed(vertexArray);
 	}
 
 	public static onScreenResize = (width: number, height: number): void => {

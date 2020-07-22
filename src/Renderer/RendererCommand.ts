@@ -30,8 +30,7 @@ class RendererCommand {
 		RendererCommand.ctx.clear(RendererCommand.ctx.COLOR_BUFFER_BIT | RendererCommand.ctx.DEPTH_BUFFER_BIT);
 	}
 
-	public static drawIndexed = (shader: Shader, vertexArray: VertexArray, indexCount?: number, indexStart = 0): void => {
-		shader.bind();
+	public static drawIndexed = (vertexArray: VertexArray, indexCount?: number, indexStart = 0): void => {
 		vertexArray.bind();
 		const count = indexCount ?? vertexArray.getIndexBuffer().count;
 		RendererCommand.ctx.drawElements(RendererCommand.ctx.TRIANGLES,

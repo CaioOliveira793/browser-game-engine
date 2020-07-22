@@ -8,7 +8,7 @@ export class Material {
 
 	constructor(shader: Shader) {
 		this.shader = shader;
-		this.materialInfo = this.shader.getUniformBlocksInfo().get('ub_material') as UniformBlockInfo;
+		this.materialInfo = this.shader.getUniformBlocksInfo().get('ub_Material') as UniformBlockInfo;
 	}
 }
 
@@ -32,9 +32,12 @@ export class MaterialInstance {
 	}
 
 	public upload = (): void => {
+		this.uniformBuffer.setData(this.buffer);
 		this.material.shader.bind();
 		this.material.shader.uploadUniformBuffer('ub_Material', this.uniformBuffer);
 	}
+
+	public getShader = (): Shader => this.material.shader;
 }
 
 export default Material;
