@@ -5,7 +5,7 @@ class UniformBuffer {
 
 	public readonly id: WebGLBuffer;
 
-	constructor(size: number, data?: ArrayBuffer | ArrayBufferView) {
+	constructor(size: number, data?: BufferSource) {
 		this.id = UniformBuffer.ctx.createBuffer() as WebGLBuffer;
 
 		UniformBuffer.ctx.bindBuffer(UniformBuffer.ctx.UNIFORM_BUFFER, this.id);
@@ -16,9 +16,9 @@ class UniformBuffer {
 			UniformBuffer.ctx.bufferData(UniformBuffer.ctx.UNIFORM_BUFFER, size, UniformBuffer.ctx.DYNAMIC_DRAW);
 	}
 
-	public setData = (data: ArrayBufferView, destOffset = 0, srcOffset = 0, length = 0): void => {
+	public setData = (data: BufferSource, destOffset = 0): void => {
 		UniformBuffer.ctx.bindBuffer(UniformBuffer.ctx.UNIFORM_BUFFER, this.id);
-		UniformBuffer.ctx.bufferSubData(UniformBuffer.ctx.UNIFORM_BUFFER, destOffset, data, srcOffset, length);
+		UniformBuffer.ctx.bufferSubData(UniformBuffer.ctx.UNIFORM_BUFFER, destOffset, data);
 	}
 
 	public bind = (): void => { UniformBuffer.ctx.bindBuffer(UniformBuffer.ctx.UNIFORM_BUFFER, this.id); }

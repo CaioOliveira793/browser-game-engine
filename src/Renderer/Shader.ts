@@ -17,7 +17,7 @@ export interface UniformBlockInfo {
 	readonly inFragment: boolean;
 }
 
-export interface UniformsInfo {
+export interface UniformInfo {
 	readonly type: number;
 	readonly count: number;
 	readonly location: WebGLUniformLocation;
@@ -31,8 +31,8 @@ export class Shader {
 
 	private id: WebGLProgram = 0;
 
-	private readonly uniforms = new Map<string, UniformsInfo>();
-	private readonly uniformsBlock = new Map<string, UniformBlockInfo>();
+	private readonly uniforms = new Map<string, UniformInfo>();
+	private readonly uniformBlocks = new Map<string, UniformBlockInfo>();
 
 	constructor(vertexSrc: string, fragmentSrc: string) {
 		this.compile(new Map([
@@ -47,8 +47,8 @@ export class Shader {
 	public bind = (): void => { Shader.ctx.useProgram(this.id); }
 	public delete = (): void => { Shader.ctx.deleteProgram(this.id); }
 
-	public getUniformBlocksInfo = (): Map<string, UniformBlockInfo> => this.uniformsBlock;
-	public getUniformsInfo = (): Map<string, UniformsInfo> => this.uniforms;
+	public getUniformBlocksInfo = (): Map<string, UniformBlockInfo> => this.uniformBlocks;
+	public getUniformsInfo = (): Map<string, UniformInfo> => this.uniforms;
 
 	public uploadUniformFloat = (name: string, float: number | Float32Array | number[]): void => {
 		Shader.ctx.uniform1fv(this.uniforms.get(name)?.location as WebGLUniformLocation, float as Float32Array);
@@ -113,7 +113,7 @@ export class Shader {
 	}
 
 	public uploadUniformBuffer = (name: string, uniformBuffer: UniformBuffer): void => {
-		const blockInfo = this.uniformsBlock.get(name) as UniformBlockInfo;
+		const blockInfo = this.uniformBlocks.get(name) as UniformBlockInfo;
 		uniformBuffer.bind();
 		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo.index, uniformBuffer.id);
 	}
@@ -176,7 +176,7 @@ export class Shader {
 
 			const uniforms = this.queryUniformsInUniformBlock(uniformsIndices as unknown as number[]);
 
-			this.uniformsBlock.set(Shader.ctx.getActiveUniformBlockName(this.id, blockIndex) as string, {
+			this.uniformBlocks.set(Shader.ctx.getActiveUniformBlockName(this.id, blockIndex) as string, {
 				index: blockIndex,
 				size,
 				uniformsIndices,

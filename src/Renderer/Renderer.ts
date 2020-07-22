@@ -23,7 +23,7 @@ class SceneData {
 class Renderer {
 	private static aspectRatio: number;
 
-	private static sceneData: SceneData;
+	private static sceneData = new SceneData(Mat4.create());
 	private static uniformBufferSceneData: UniformBuffer;
 
 	public static init = (context: WebGL2RenderingContext): void => {
@@ -32,18 +32,21 @@ class Renderer {
 
 	public static beginScene = (camera: OrthographicCamera): void => {
 		Renderer.sceneData = new SceneData(camera.getViewProjectionMatrix());
+		if (!Renderer.uniformBufferSceneData)
+			Renderer.uniformBufferSceneData = new UniformBuffer(Renderer.sceneData.buffer.byteLength);
 
-		Renderer.uniformBufferSceneData = new UniformBuffer(Renderer.sceneData.buffer.byteLength, Renderer.sceneData.buffer);
+		Renderer.uniformBufferSceneData.setData(Renderer.sceneData.buffer);
 	}
 
 	public static endScene = (): void => {
 		// finish the scene and draw everything
+		// Renderer.uniformBufferSceneData.delete();
 	}
 
 	public static submit = (shader: Shader, vertexArray: VertexArray, transform = Mat4.create()): void => {
 		shader.bind();
-		shader.uploadUniformBuffer('ub_scene', Renderer.uniformBufferSceneData);
-		shader.uploadUniformMat4('u_transform', transform);
+		shader.uploadUniformBuffer('ub_Scene', Renderer.uniformBufferSceneData);
+		shader.uploadUniformMat4('u_Transform', transform);
 		RendererCommand.drawIndexed(shader, vertexArray);
 	}
 
