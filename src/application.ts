@@ -71,7 +71,7 @@ abstract class Application {
 	protected abstract onMouseEvent: (e: TypedEvents) => void;
 
 	private run = (time: number): void => {
-		const deltaTime = time - this.previousTime;
+		const deltaTime = (time - this.previousTime) / 1000;
 		this.previousTime = time;
 
 		Input.reset();
