@@ -13,8 +13,8 @@ abstract class Application {
 	private overlayQueue: Map<Layer, Layer>;
 	private eventQueue: Set<TypedEvents>;
 
-	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
-		this.screen = new Screen(canvas, width, height, this.storeEvents);
+	constructor(canvas: HTMLCanvasElement) {
+		this.screen = new Screen(canvas, this.storeEvents);
 
 		this.isRunning = false;
 		this.previousTime = 0;
@@ -73,8 +73,6 @@ abstract class Application {
 	private run = (time: number): void => {
 		const deltaTime = time - this.previousTime;
 		this.previousTime = time;
-
-		this.screen.checkResize();
 
 		Input.reset();
 		this.eventQueue.forEach(event => this.eventPropagator(event));

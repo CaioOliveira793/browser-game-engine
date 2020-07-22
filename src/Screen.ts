@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TypedEvents } from './Events/Events';
 import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent } from './Events/ScreenEvents';
 import { KeyCodeMapTable } from './Inputs/KeyCodes';
@@ -10,13 +11,16 @@ export class Screen {
 	private canvas: HTMLCanvasElement;
 	private context: WebGL2RenderingContext;
 
-	private observer: MutationObserver;
+	private screenCloseObserver: MutationObserver;
+	// lib.dom.d.ts does not have the ResizeObserver yet
+	// @ts-ignore
+	private screenResizeObserver: ResizeObserver;
 	private eventCallback: (e: TypedEvents) => void;
 
-	constructor(canvas: HTMLCanvasElement, width: number, height: number, eventCallback: (e: TypedEvents) => void) {
+	constructor(canvas: HTMLCanvasElement, eventCallback: (e: TypedEvents) => void) {
 		this.canvas = canvas;
-		this.canvas.width = width;
-		this.canvas.height = height;
+		this.canvas.width = this.canvas.clientWidth;
+		this.canvas.height = this.canvas.clientWidth;
 		this.canvas.tabIndex = 0;
 
 		const webgl = canvas.getContext('webgl2');
@@ -30,7 +34,9 @@ export class Screen {
 		Renderer.init(this.context);
 
 		this.eventCallback = eventCallback;
-		this.observer = new MutationObserver(this.handleScreenCloseMutationCallback);
+		this.screenCloseObserver = new MutationObserver(this.handleScreenCloseMutationCallback);
+		// @ts-ignore
+		this.screenResizeObserver = new ResizeObserver(this.handleScreenResizeMutationCallback);
 	}
 
 	public getWidth = (): number => this.canvas.clientWidth;
@@ -40,20 +46,6 @@ export class Screen {
 	public getCanvas = (): HTMLCanvasElement => this.canvas;
 
 	public setFullscreen = (): Promise<void> => this.canvas.requestFullscreen({ navigationUI: 'hide' });
-
-	public checkResize = (): void => {
-		const displayWidth  = this.canvas.clientWidth;
-		const displayHeight = this.canvas.clientHeight;
-
-		if (this.canvas.width  !== displayWidth || this.canvas.height !== displayHeight) {
-			this.canvas.width  = displayWidth;
-			this.canvas.height = displayHeight;
-			Renderer.onScreenResize(displayWidth, displayHeight);
-
-			const e = new ScreenResizeEvent(displayWidth, displayHeight);
-			this.eventCallback(e);
-		}
-	}
 
 	public addEvents = (): void => {
 		const listenerOptions = {
@@ -65,7 +57,12 @@ export class Screen {
 		// screen events:
 		this.canvas.addEventListener('focus', this.handleScreenFocus, listenerOptions);
 		this.canvas.addEventListener('blur', this.handleScreenBlur, listenerOptions);
-		this.observer.observe(this.canvas.parentElement as HTMLElement, { childList: true });
+		this.screenResizeObserver.observe(this.canvas);
+		this.screenCloseObserver.observe(this.canvas.parentElement as HTMLElement, {
+			childList: true,
+			attributes: false,
+			characterData: false,
+		});
 
 		// keyboard events:
 		this.canvas.addEventListener('keydown', this.handleKeyboardDown, listenerOptions);
@@ -88,7 +85,8 @@ export class Screen {
 		// screen events:
 		this.canvas.removeEventListener('focus', this.handleScreenFocus, listenerOptions);
 		this.canvas.removeEventListener('blur', this.handleScreenBlur, listenerOptions);
-		this.observer.disconnect();
+		this.screenResizeObserver.disconnect();
+		this.screenCloseObserver.disconnect();
 
 		// keyboard events:
 		this.canvas.removeEventListener('keydown', this.handleKeyboardDown, listenerOptions);
@@ -107,6 +105,18 @@ export class Screen {
 			const e = new ScreenCloseEvent();
 			this.eventCallback(e);
 		}
+	}
+
+	private handleScreenResizeMutationCallback = (): void => {
+		const displayWidth = this.canvas.clientWidth;
+		const displayHeight = this.canvas.clientHeight;
+
+		this.canvas.width = displayWidth;
+		this.canvas.height = displayHeight;
+		Renderer.onScreenResize(displayWidth, displayHeight);
+
+		const e = new ScreenResizeEvent(displayWidth, displayHeight);
+		this.eventCallback(e);
 	}
 
 	private handleScreenFocus = (event: FocusEvent): void => {
