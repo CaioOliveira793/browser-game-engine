@@ -2,7 +2,7 @@ import { mat4 as Mat4 } from 'gl-matrix';
 import RendererCommand from './RendererCommand';
 import VertexArray from './VertexArray';
 import UniformBuffer from './UniformBuffer';
-import { OrthographicCamera } from './Camera';
+import { OrthographicCamera, PerspectiveCamera } from './Camera';
 import { MaterialInstance } from './Material';
 
 
@@ -30,7 +30,7 @@ class Renderer {
 		RendererCommand.init(context);
 	}
 
-	public static beginScene = (camera: OrthographicCamera): void => {
+	public static beginScene = (camera: OrthographicCamera | PerspectiveCamera): void => {
 		Renderer.sceneData = new SceneData(camera.getViewProjectionMatrix());
 		if (!Renderer.uniformBufferSceneData)
 			Renderer.uniformBufferSceneData = new UniformBuffer(Renderer.sceneData.buffer.byteLength);
