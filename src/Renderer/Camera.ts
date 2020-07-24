@@ -9,26 +9,18 @@ export class OrthographicCamera {
 	private position = Vec3.create();
 	private rotation = Vec3.create();
 
-	private width: number;
-	private zoomLevel: number;
-	private aspectRatio: number;
-
-	constructor(width: number, aspectRatio: number, zoomLevel?: number) {
-		this.width = width;
-		this.aspectRatio = aspectRatio;
-		this.zoomLevel = zoomLevel ?? width;
-		Mat4.ortho(this.projectionMatrix,
-			-this.aspectRatio * this.width,
-			this.aspectRatio * this.width,
-			-this.width,
-			this.width,
-			-this.zoomLevel,
-			this.zoomLevel);
+	constructor(left: number, right: number, bottom: number, top: number, near: number, far: number) {
+		Mat4.ortho(this.projectionMatrix, left, right, bottom, top, near, far);
 
 		Mat4.multiply(this.viewProjectionMatrix, this.projectionMatrix, this.viewMatrix);
 	}
 
 	public getViewProjectionMatrix = (): Mat4 => this.viewProjectionMatrix;
+	public setViewProjection = (left: number, right: number, bottom: number, top: number, near: number, far: number): void => {
+		Mat4.ortho(this.projectionMatrix, left, right, bottom, top, near, far);
+
+		Mat4.multiply(this.viewProjectionMatrix, this.projectionMatrix, this.viewMatrix);
+	}
 
 	public getPosition = (): Vec3 => this.position;
 	public setPosition = (position: Vec3): void => {
@@ -36,18 +28,6 @@ export class OrthographicCamera {
 		this.position[1] = position[1];
 		this.position[2] = position[2];
 
-		this.calculateViewMatrix();
-	}
-	public setPositionX = (x: number): void => {
-		this.position[0] = x;
-		this.calculateViewMatrix();
-	}
-	public setPositionY = (y: number): void => {
-		this.position[1] = y;
-		this.calculateViewMatrix();
-	}
-	public setPositionZ = (z: number): void => {
-		this.position[2] = z;
 		this.calculateViewMatrix();
 	}
 
@@ -58,31 +38,6 @@ export class OrthographicCamera {
 		this.rotation[2] = angle[2];
 
 		this.calculateViewMatrix();
-	}
-	public setRotationX = (x: number): void => {
-		this.rotation[0] = x;
-		this.calculateViewMatrix();
-	}
-	public setRotationY = (y: number): void => {
-		this.rotation[1] = y;
-		this.calculateViewMatrix();
-	}
-	public setRotationZ = (z: number): void => {
-		this.rotation[2] = z;
-		this.calculateViewMatrix();
-	}
-
-	public setAspectRatio = (aspectRatio: number): void => {
-		this.aspectRatio = aspectRatio;
-		Mat4.ortho(this.projectionMatrix,
-			-this.aspectRatio * this.width,
-			this.aspectRatio * this.width,
-			-this.width,
-			this.width,
-			-this.zoomLevel,
-			this.zoomLevel);
-
-		Mat4.multiply(this.viewProjectionMatrix, this.projectionMatrix, this.viewMatrix);
 	}
 
 
