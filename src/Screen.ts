@@ -250,7 +250,7 @@ export class Screen {
 			y: event.offsetY,
 		};
 
-		const e = new MouseScrollEvent(event.deltaY, position, commandKeys);
+		const e = new MouseScrollEvent((event.deltaY > 0) ? 5 : -5, position, commandKeys);
 		this.eventCallback(e);
 	}
 }
