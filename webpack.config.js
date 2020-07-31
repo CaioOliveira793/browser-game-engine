@@ -40,6 +40,19 @@ module.exports = {
 		}, {
 			test: /\.glsl$/,
 			loader: 'webpack-glsl-loader'
+		}, {
+			test: /\.(gif|png|jpe?g|svg)$/i,
+			loader: 'file-loader'
+		}, {
+			test: /\.(gif|png|jpe?g|svg)$/i,
+			loader: 'image-webpack-loader',
+			options: {
+				bypassOnDebug: true,
+				disable: true,
+				optimizer: {
+					enabled: false
+				}
+			},
 		}]
 	},
 	devServer: {
