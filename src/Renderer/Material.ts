@@ -25,10 +25,9 @@ export class MaterialInstance {
 		this.uniformBuffer = new UniformBuffer(this.material.materialInfo.size);
 	}
 
-	public set = (name: string, buffer: ArrayLike<number>): void => {
+	public set = (name: string, buffer: ArrayLike<number>, type: new (buffer: ArrayBuffer) => TypedArrayBuffer): void => {
 		const offset = this.material.materialInfo.uniforms.get(name)?.offset;
-		// may not work when the buffer is setted with a different type
-		(new Float32Array(this.buffer)).set(buffer, offset);
+		(new type(this.buffer)).set(buffer, offset);
 	}
 
 	public upload = (): void => {

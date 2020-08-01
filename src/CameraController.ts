@@ -1,11 +1,11 @@
 import { glMatrix, vec3 as Vec3 } from 'gl-matrix';
-import { OrthographicCamera } from './Camera';
+import { OrthographicCamera } from './Renderer/Camera';
 
-import Input from '../Inputs/Input';
-import Key from '../Inputs/KeyCodes';
+import Input from './Inputs/Input';
+import Key from './Inputs/KeyCodes';
 
-import { ScreenResizeEvent } from '../Events/ScreenEvents';
-import { MouseScrollEvent } from '../Events/MouseEvents';
+import { ScreenResizeEvent } from './Events/ScreenEvents';
+import { MouseScrollEvent } from './Events/MouseEvents';
 
 
 export class OrthographicCameraController {

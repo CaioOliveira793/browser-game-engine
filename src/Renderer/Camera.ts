@@ -91,18 +91,6 @@ export class PerspectiveCamera {
 
 		this.calculateViewMatrix();
 	}
-	public setPositionX = (x: number): void => {
-		this.position[0] = x;
-		this.calculateViewMatrix();
-	}
-	public setPositionY = (y: number): void => {
-		this.position[1] = y;
-		this.calculateViewMatrix();
-	}
-	public setPositionZ = (z: number): void => {
-		this.position[2] = z;
-		this.calculateViewMatrix();
-	}
 
 	public getRotation = (): Vec3 => this.rotation;
 	public setRotation = (angle: Vec3): void => {
@@ -110,18 +98,6 @@ export class PerspectiveCamera {
 		this.rotation[1] = angle[1];
 		this.rotation[2] = angle[2];
 
-		this.calculateViewMatrix();
-	}
-	public setRotationX = (x: number): void => {
-		this.rotation[0] = x;
-		this.calculateViewMatrix();
-	}
-	public setRotationY = (y: number): void => {
-		this.rotation[1] = y;
-		this.calculateViewMatrix();
-	}
-	public setRotationZ = (z: number): void => {
-		this.rotation[2] = z;
 		this.calculateViewMatrix();
 	}
 
