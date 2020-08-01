@@ -50,8 +50,8 @@ export class Shader {
 	public getUniformBlocksInfo = (): Map<string, UniformBlockInfo> => this.uniformBlocks;
 	public getUniformsInfo = (): Map<string, UniformInfo> => this.uniforms;
 
-	public uploadUniformFloat = (name: string, float: number | Float32Array | number[]): void => {
-		Shader.ctx.uniform1fv(this.uniforms.get(name)?.location as WebGLUniformLocation, float as Float32Array);
+	public uploadUniformFloat = (name: string, float: Float32Array | number[]): void => {
+		Shader.ctx.uniform1fv(this.uniforms.get(name)?.location as WebGLUniformLocation, float);
 	}
 	public uploadUniformVec2 = (name: string, vec2: Float32Array | number[]): void => {
 		Shader.ctx.uniform2fv(this.uniforms.get(name)?.location as WebGLUniformLocation, vec2);
@@ -63,8 +63,8 @@ export class Shader {
 		Shader.ctx.uniform4fv(this.uniforms.get(name)?.location as WebGLUniformLocation, vec4);
 	}
 
-	public uploadUniformInt = (name: string, int: number | Int32Array | number[]): void => {
-		Shader.ctx.uniform1iv(this.uniforms.get(name)?.location as WebGLUniformLocation, int as Int32Array);
+	public uploadUniformInt = (name: string, int: Int32Array | number[]): void => {
+		Shader.ctx.uniform1iv(this.uniforms.get(name)?.location as WebGLUniformLocation, int);
 	}
 	public uploadUniformIVec2 = (name: string, ivec2: Int32Array | number[]): void => {
 		Shader.ctx.uniform2iv(this.uniforms.get(name)?.location as WebGLUniformLocation, ivec2);
@@ -76,8 +76,8 @@ export class Shader {
 		Shader.ctx.uniform4iv(this.uniforms.get(name)?.location as WebGLUniformLocation, ivec4);
 	}
 
-	public uploadUniformUInt = (name: string, uint: number | Uint32Array | number[]): void => {
-		Shader.ctx.uniform1uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uint as Uint32Array);
+	public uploadUniformUInt = (name: string, uint: Uint32Array | number[]): void => {
+		Shader.ctx.uniform1uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uint);
 	}
 	public uploadUniformUVec2 = (name: string, uvec2: Uint32Array | number[]): void => {
 		Shader.ctx.uniform2uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uvec2);
@@ -89,7 +89,7 @@ export class Shader {
 		Shader.ctx.uniform4uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, uvec4);
 	}
 
-	public uploadUniformBool = (name: string, bool: boolean | Uint32Array | boolean[]): void => {
+	public uploadUniformBool = (name: string, bool: Uint32Array | boolean[]): void => {
 		Shader.ctx.uniform1uiv(this.uniforms.get(name)?.location as WebGLUniformLocation, bool as Uint32Array);
 	}
 	public uploadUniformBVec2 = (name: string, bvec2: Uint32Array | boolean[]): void => {

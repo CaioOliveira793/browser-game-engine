@@ -3,6 +3,7 @@ import IndexBuffer from './IndexBuffer';
 import UniformBuffer from './UniformBuffer';
 import VertexArray from './VertexArray';
 import Shader from './Shader';
+import Texture2D from './Texture';
 
 
 class RendererCommand {
@@ -16,6 +17,13 @@ class RendererCommand {
 		UniformBuffer.init(context);
 		VertexArray.init(context);
 		Shader.init(context);
+		Texture2D.init(context);
+
+		RendererCommand.ctx.enable(RendererCommand.ctx.CULL_FACE);
+		RendererCommand.ctx.enable(RendererCommand.ctx.DEPTH_TEST);
+
+		RendererCommand.ctx.enable(RendererCommand.ctx.BLEND);
+		RendererCommand.ctx.blendFunc(RendererCommand.ctx.SRC_ALPHA, RendererCommand.ctx.ONE_MINUS_SRC_ALPHA);
 	}
 
 	public static setViewport = (x = 0, y = 0, width = RendererCommand.ctx.drawingBufferWidth, height = RendererCommand.ctx.drawingBufferHeight): void => {

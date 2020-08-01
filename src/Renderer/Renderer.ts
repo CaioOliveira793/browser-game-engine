@@ -3,7 +3,7 @@ import RendererCommand from './RendererCommand';
 import VertexArray from './VertexArray';
 import UniformBuffer from './UniformBuffer';
 import { OrthographicCamera, PerspectiveCamera } from './Camera';
-import { MaterialInstance } from './Material';
+import Shader from './Shader';
 
 
 class SceneData {
@@ -43,10 +43,9 @@ class Renderer {
 		// Renderer.uniformBufferSceneData.delete();
 	}
 
-	public static submit = (material: MaterialInstance, vertexArray: VertexArray, transform = Mat4.create()): void => {
-		material.upload();
-		material.getShader().uploadUniformBuffer('ub_Scene', Renderer.uniformBufferSceneData);
-		material.getShader().uploadUniformMat4('u_Transform', transform);
+	public static submit = (shader: Shader, vertexArray: VertexArray, transform = Mat4.create()): void => {
+		shader.uploadUniformBuffer('ub_Scene', Renderer.uniformBufferSceneData);
+		shader.uploadUniformMat4('u_Transform', transform);
 		RendererCommand.drawIndexed(vertexArray);
 	}
 
