@@ -10,7 +10,6 @@ import UniformBuffer from './UniformBuffer';
 import Shader from './Shader';
 import Texture2D from './Texture';
 
-import { flatColorVertexSource, flatColorFragmentSource } from './Materials/FlatColor';
 import { texture2DVertexSource, texture2DFragmentSource } from './Materials/Texture2D';
 
 import { OrthographicCamera, PerspectiveCamera } from './Camera';
@@ -32,14 +31,14 @@ class SceneData {
 
 
 class Renderer2DData {
-	public quadVertexArray: VertexArray;
-	public flatColorShader: Shader;
-	public texture2DShader: Shader;
+	public readonly quadVertexArray: VertexArray;
+	public readonly quadShader: Shader;
+	public readonly blankTexture: Texture2D;
 
 	constructor() {
 		this.quadVertexArray = new VertexArray();
-		this.flatColorShader = new Shader(flatColorVertexSource, flatColorFragmentSource);
-		this.texture2DShader = new Shader(texture2DVertexSource, texture2DFragmentSource);
+		this.quadShader = new Shader(texture2DVertexSource, texture2DFragmentSource);
+		this.blankTexture = new Texture2D(1, 1, 4, Uint8ClampedArray, new Uint8ClampedArray([255, 255, 255, 255]));
 
 		const vBuffer = new Float32Array([
 			-1, -1, 0, 0.0, 0.0, // 0
@@ -60,8 +59,8 @@ class Renderer2DData {
 
 	public delete = (): void => {
 		this.quadVertexArray.delete();
-		this.flatColorShader.delete();
-		this.texture2DShader.delete();
+		this.quadShader.delete();
+		this.blankTexture.delete();
 	}
 }
 
@@ -83,8 +82,9 @@ class Renderer2D {
 	public static beginScene = (camera: OrthographicCamera | PerspectiveCamera): void => {
 		Renderer2D.sceneData = new SceneData(camera.getViewProjectionMatrix());
 		Renderer2D.sceneDataUBuffer.setData(Renderer2D.sceneData.buffer);
-		Renderer2D.data.flatColorShader.bind();
-		Renderer2D.data.flatColorShader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
+		Renderer2D.data.blankTexture.bind(0);
+		Renderer2D.data.quadShader.bind();
+		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
 	}
 	public static endScene = (): void => {
 		///////////////////////////////////////////
@@ -97,21 +97,29 @@ class Renderer2D {
 		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
 
 		Renderer2D.materialUBuffer.setData(new Float32Array(color));
-		Renderer2D.data.flatColorShader.bind();
-		Renderer2D.data.flatColorShader.uploadUniformMat4('u_Transform', transform);
-		Renderer2D.data.flatColorShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
+
+		Renderer2D.data.quadShader.bind();
+		Renderer2D.data.quadShader.uploadUniformMat4('u_Transform', transform);
+		Renderer2D.data.quadShader.uploadUniformInt('u_Texture', [0]);
+		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
+
 		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
 	}
 
-	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, texture: Texture2D): void => {
+	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, texture: Texture2D, tintColor = Vec4.fromValues(1.0, 1.0, 1.0, 1.0)): void => {
 		const transform = Mat4.create();
 		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
 		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
 
-		texture.bind(0);
-		Renderer2D.data.texture2DShader.bind();
-		Renderer2D.data.texture2DShader.uploadUniformMat4('u_Transform', transform);
-		Renderer2D.data.texture2DShader.uploadUniformInt('u_Texture', [0]);
+		Renderer2D.materialUBuffer.setData(new Float32Array(tintColor));
+
+		texture.bind(1);
+
+		Renderer2D.data.quadShader.bind();
+		Renderer2D.data.quadShader.uploadUniformMat4('u_Transform', transform);
+		Renderer2D.data.quadShader.uploadUniformInt('u_Texture', [1]);
+		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
+
 		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
 	}
 
