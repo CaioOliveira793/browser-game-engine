@@ -6,7 +6,7 @@ class MyApp extends Application {
 	private layer: ExempleLayer;
 
 	constructor(canvas: HTMLCanvasElement) {
-		super(canvas, 854, 480);
+		super(canvas);
 		this.layer = new ExempleLayer;
 
 		this.pushLayer(this.layer);

@@ -31,60 +31,58 @@ export function shaderDataTypeToSize(type: ShaderDataType): number {
 	return 0;
 }
 
-export class BufferElement {
-	public type: ShaderDataType;
-	public name: string;
-	public size: number;
-	public offset: number;
-	public normalized: boolean;
-
-	constructor(type: ShaderDataType, name: string, normalized = false) {
-		this.type = type;
-		this.name = name;
-		this.normalized = normalized;
-		this.offset = 0;
-		this.size = shaderDataTypeToSize(type);
+function shaderDataTypeTocomponentCount(type: ShaderDataType): number {
+	switch (type) {
+		case ShaderDataType.Float:   return 1;
+		case ShaderDataType.Float2:  return 2;
+		case ShaderDataType.Float3:  return 3;
+		case ShaderDataType.Float4:  return 4;
+		case ShaderDataType.Mat3:    return 3; // * float3
+		case ShaderDataType.Mat4:    return 4; // * float4
+		case ShaderDataType.Int:     return 1;
+		case ShaderDataType.Int2:    return 2;
+		case ShaderDataType.Int3:    return 3;
+		case ShaderDataType.Int4:    return 4;
+		case ShaderDataType.Bool:    return 1;
 	}
 
-	public getComponentCount = (): number => {
-		switch (this.type) {
-			case ShaderDataType.Float:   return 1;
-			case ShaderDataType.Float2:  return 2;
-			case ShaderDataType.Float3:  return 3;
-			case ShaderDataType.Float4:  return 4;
-			case ShaderDataType.Mat3:    return 3; // * float3
-			case ShaderDataType.Mat4:    return 4; // * float4
-			case ShaderDataType.Int:     return 1;
-			case ShaderDataType.Int2:    return 2;
-			case ShaderDataType.Int3:    return 3;
-			case ShaderDataType.Int4:    return 4;
-			case ShaderDataType.Bool:    return 1;
-		}
-
-		return 0;
-	}
+	return 0;
 }
 
 
-export class BufferLayout {
-	private elements: BufferElement[];
-	private stride: number;
+export interface BufferElement {
+	type: ShaderDataType;
+	normalized: boolean;
+	size: number;
+	offset: number;
+	componentCount: number;
+}
 
-	constructor(elements: BufferElement[]) {
-		this.elements = elements;
+export class BufferLayout extends Array<BufferElement> {
+	public readonly stride: number;
 
+	constructor(elements: { type: ShaderDataType, normalized?: boolean }[]) {
+		super(elements.length);
 		let offset = 0;
-		this.stride = 0;
+		let stride = 0;
 
-		this.elements.forEach(element => {
-			element.offset = offset;
-			offset += element.size;
-			this.stride += element.size;
+		elements.forEach(element => {
+			const size = shaderDataTypeToSize(element.type);
+
+			super.push({
+				type: element.type,
+				normalized: !!element.normalized,
+				componentCount: shaderDataTypeTocomponentCount(element.type),
+				size,
+				offset
+			});
+
+			offset += size;
+			stride += size;
 		});
-	}
 
-	public getElements = (): BufferElement[] => this.elements;
-	public getStride = (): number => this.stride;
+		this.stride = stride;
+	}
 }
 
 

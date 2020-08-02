@@ -28,7 +28,6 @@
 			{ "allow": ["warn", "error"] }
 		],
 		"no-template-curly-in-string": "error",
-		"init-declarations": ["error", "always"],
 		"no-label-var": "error",
 		"no-shadow": "error",
 		"no-use-before-define": "error",

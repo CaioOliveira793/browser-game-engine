@@ -6,11 +6,11 @@ class IndexBuffer {
 
 	private readonly id: WebGLBuffer;
 
-	private readonly count: number;
-	private readonly type: GLenum = 0;
-	private readonly indiceSize: number = 0;
+	public readonly count: number;
+	public readonly type: GLenum = 0;
+	public readonly indiceSize: number = 0;
 
-	constructor(indices: Uint8Array | Uint16Array | Uint32Array | BigUint64Array) {
+	constructor(indices: Uint8Array | Uint16Array | Uint32Array) {
 		this.id = IndexBuffer.ctx.createBuffer() as WebGLBuffer;
 
 		IndexBuffer.ctx.bindBuffer(IndexBuffer.ctx.ELEMENT_ARRAY_BUFFER, this.id);
@@ -27,12 +27,10 @@ class IndexBuffer {
 		} else if (indices instanceof Uint32Array) {
 			this.type = IndexBuffer.ctx.UNSIGNED_INT;
 			this.indiceSize = 4;
+		} else {
+			console.error('Unknown IndexBuffer type: ', indices);
 		}
 	}
-
-	public getCount = (): number => this.count;
-	public getIndiceSize = (): number => this.indiceSize;
-	public getType = (): number => this.type;
 
 	public bind = (): void => { IndexBuffer.ctx.bindBuffer(IndexBuffer.ctx.ELEMENT_ARRAY_BUFFER, this.id); }
 	public delete = (): void => { IndexBuffer.ctx.deleteBuffer(this.id); }

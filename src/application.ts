@@ -13,8 +13,8 @@ abstract class Application {
 	private overlayQueue: Map<Layer, Layer>;
 	private eventQueue: Set<TypedEvents>;
 
-	constructor(canvas: HTMLCanvasElement, width: number, height: number) {
-		this.screen = new Screen(canvas, width, height, this.storeEvents);
+	constructor(canvas: HTMLCanvasElement) {
+		this.screen = new Screen(canvas, this.storeEvents);
 
 		this.isRunning = false;
 		this.previousTime = 0;
@@ -71,7 +71,7 @@ abstract class Application {
 	protected abstract onMouseEvent: (e: TypedEvents) => void;
 
 	private run = (time: number): void => {
-		const deltaTime = time - this.previousTime;
+		const deltaTime = (time - this.previousTime) / 1000;
 		this.previousTime = time;
 
 		Input.reset();
@@ -90,20 +90,21 @@ abstract class Application {
 		switch (e.category) {
 			case EventCategory.Screen:
 				this.onScreenEvent(e);
+				Input.updateScreenBlur(e);
 				this.layerQueue.forEach(layer => layer.onScreenEvent(e));
 				this.overlayQueue.forEach(overlay => overlay.onScreenEvent(e));
 				break;
 
 			case EventCategory.Keyboard:
 				this.onKeyboardEvent(e);
-				Input.update(e as InputEvents);
+				Input.updateKeysAndButtons(e as InputEvents);
 				this.layerQueue.forEach(layer => layer.onKeyboardEvent(e));
 				this.overlayQueue.forEach(overlay => overlay.onKeyboardEvent(e));
 				break;
 
 			case EventCategory.Mouse:
 				this.onMouseEvent(e);
-				Input.update(e as InputEvents);
+				Input.updateKeysAndButtons(e as InputEvents);
 				this.layerQueue.forEach(layer => layer.onMouseEvent(e));
 				this.overlayQueue.forEach(overlay => overlay.onMouseEvent(e));
 				break;

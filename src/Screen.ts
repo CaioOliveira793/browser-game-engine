@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 import { TypedEvents } from './Events/Events';
 import { ScreenResizeEvent, ScreenCloseEvent, ScreenFocusEvent, ScreenBlurEvent } from './Events/ScreenEvents';
 import { KeyCodeMapTable } from './Inputs/KeyCodes';
@@ -10,15 +11,16 @@ export class Screen {
 	private canvas: HTMLCanvasElement;
 	private context: WebGL2RenderingContext;
 
-	private resolutionOffFullscreen: { width: number, height: number };
-
-	private observer: MutationObserver;
+	private screenCloseObserver: MutationObserver;
+	// lib.dom.d.ts does not have the ResizeObserver yet
+	// @ts-ignore
+	private screenResizeObserver: ResizeObserver;
 	private eventCallback: (e: TypedEvents) => void;
 
-	constructor(canvas: HTMLCanvasElement, width: number, height: number, eventCallback: (e: TypedEvents) => void) {
+	constructor(canvas: HTMLCanvasElement, eventCallback: (e: TypedEvents) => void) {
 		this.canvas = canvas;
-		this.canvas.width = width;
-		this.canvas.height = height;
+		this.canvas.width = this.canvas.clientWidth;
+		this.canvas.height = this.canvas.clientWidth;
 		this.canvas.tabIndex = 0;
 
 		const webgl = canvas.getContext('webgl2');
@@ -32,19 +34,16 @@ export class Screen {
 		Renderer.init(this.context);
 
 		this.eventCallback = eventCallback;
-
-		this.resolutionOffFullscreen = {
-			width: this.canvas.width,
-			height: this.canvas.height
-		};
-
-		this.observer = new MutationObserver(this.handleScreenCloseMutationCallback);
+		this.screenCloseObserver = new MutationObserver(this.handleScreenCloseMutationCallback);
+		// @ts-ignore
+		this.screenResizeObserver = new ResizeObserver(this.handleScreenResizeMutationCallback);
 	}
 
-	public getWidth = (): number => this.canvas.width;
-	public getHeight = (): number => this.canvas.height;
+	public getWidth = (): number => this.canvas.clientWidth;
+	public getHeight = (): number => this.canvas.clientHeight;
 
 	public getContext = (): WebGL2RenderingContext => this.context;
+	public getCanvas = (): HTMLCanvasElement => this.canvas;
 
 	public setFullscreen = (): Promise<void> => this.canvas.requestFullscreen({ navigationUI: 'hide' });
 
@@ -56,10 +55,14 @@ export class Screen {
 		};
 
 		// screen events:
-		this.canvas.addEventListener('fullscreenchange', this.handleFullScreen, listenerOptions);
 		this.canvas.addEventListener('focus', this.handleScreenFocus, listenerOptions);
 		this.canvas.addEventListener('blur', this.handleScreenBlur, listenerOptions);
-		this.observer.observe(this.canvas.parentElement as HTMLElement, { childList: true });
+		this.screenResizeObserver.observe(this.canvas);
+		this.screenCloseObserver.observe(this.canvas.parentElement as HTMLElement, {
+			childList: true,
+			attributes: false,
+			characterData: false,
+		});
 
 		// keyboard events:
 		this.canvas.addEventListener('keydown', this.handleKeyboardDown, listenerOptions);
@@ -80,10 +83,10 @@ export class Screen {
 		};
 
 		// screen events:
-		this.canvas.removeEventListener('fullscreenchange', this.handleFullScreen, listenerOptions);
 		this.canvas.removeEventListener('focus', this.handleScreenFocus, listenerOptions);
 		this.canvas.removeEventListener('blur', this.handleScreenBlur, listenerOptions);
-		this.observer.disconnect();
+		this.screenResizeObserver.disconnect();
+		this.screenCloseObserver.disconnect();
 
 		// keyboard events:
 		this.canvas.removeEventListener('keydown', this.handleKeyboardDown, listenerOptions);
@@ -97,29 +100,23 @@ export class Screen {
 	}
 
 	//// screen: //////////////////////////////////////////////////////
-	private handleFullScreen = (event: Event): void => {
-		event.preventDefault();
-		event.stopImmediatePropagation();
-
-		if (document.fullscreen) {
-			this.canvas.width = window.innerWidth;
-			this.canvas.height = window.innerHeight;
-		} else {
-			this.canvas.width = this.resolutionOffFullscreen.width;
-			this.canvas.height = this.resolutionOffFullscreen.height;
-		}
-
-		Renderer.setViewport(0, 0, this.canvas.width, this.canvas.height);
-
-		const e = new ScreenResizeEvent(this.canvas.width, this.canvas.height);
-		this.eventCallback(e);
-	}
-
 	private handleScreenCloseMutationCallback = (): void => {
 		if (!document.contains(this.canvas)) {
 			const e = new ScreenCloseEvent();
 			this.eventCallback(e);
 		}
+	}
+
+	private handleScreenResizeMutationCallback = (): void => {
+		const displayWidth = this.canvas.clientWidth;
+		const displayHeight = this.canvas.clientHeight;
+
+		this.canvas.width = displayWidth;
+		this.canvas.height = displayHeight;
+		Renderer.onScreenResize(displayWidth, displayHeight);
+
+		const e = new ScreenResizeEvent(displayWidth, displayHeight);
+		this.eventCallback(e);
 	}
 
 	private handleScreenFocus = (event: FocusEvent): void => {
@@ -253,7 +250,7 @@ export class Screen {
 			y: event.offsetY,
 		};
 
-		const e = new MouseScrollEvent(event.deltaY, position, commandKeys);
+		const e = new MouseScrollEvent((event.deltaY > 0) ? 5 : -5, position, commandKeys);
 		this.eventCallback(e);
 	}
 }
