@@ -1,13 +1,19 @@
 import { mat4 as Mat4, vec2 as Vec2, vec3 as Vec3, vec4 as Vec4 } from 'gl-matrix';
+
 import RendererCommand from './RendererCommand';
+
 import VertexArray from './VertexArray';
 import VertexBuffer from './VertexBuffer';
 import IndexBuffer from './IndexBuffer';
 import BufferLayout, { ShaderDataType } from './BufferLayout';
 import UniformBuffer from './UniformBuffer';
-import { OrthographicCamera, PerspectiveCamera } from './Camera';
 import Shader from './Shader';
-import { vertex, fragment } from './Materials/FlatColor';
+import Texture2D from './Texture';
+
+import { flatColorVertexSource, flatColorFragmentSource } from './Materials/FlatColor';
+import { texture2DVertexSource, texture2DFragmentSource } from './Materials/Texture2D';
+
+import { OrthographicCamera, PerspectiveCamera } from './Camera';
 
 
 class SceneData {
@@ -28,21 +34,24 @@ class SceneData {
 class Renderer2DData {
 	public quadVertexArray: VertexArray;
 	public flatColorShader: Shader;
+	public texture2DShader: Shader;
 
 	constructor() {
 		this.quadVertexArray = new VertexArray();
-		this.flatColorShader = new Shader(vertex, fragment);
+		this.flatColorShader = new Shader(flatColorVertexSource, flatColorFragmentSource);
+		this.texture2DShader = new Shader(texture2DVertexSource, texture2DFragmentSource);
 
 		const vBuffer = new Float32Array([
-			-1, -1, 0, // 0
-			1,  -1, 0, // 1
-			1,   1, 0, // 2
-			-1,  1, 0, // 3
+			-1, -1, 0, 0.0, 0.0, // 0
+			1,  -1, 0, 1.0, 0.0, // 1
+			1,   1, 0, 1.0, 1.0, // 2
+			-1,  1, 0, 0.0, 1.0, // 3
 		]);
 
 		const vertexBuffer = new VertexBuffer(vBuffer.length, vBuffer);
 		vertexBuffer.setLayout(new BufferLayout([
 			{ type: ShaderDataType.Float3 },
+			{ type: ShaderDataType.Float2 },
 		]));
 
 		this.quadVertexArray.addVertexBuffer(vertexBuffer);
@@ -52,6 +61,7 @@ class Renderer2DData {
 	public delete = (): void => {
 		this.quadVertexArray.delete();
 		this.flatColorShader.delete();
+		this.texture2DShader.delete();
 	}
 }
 
@@ -65,7 +75,10 @@ class Renderer2D {
 	}
 	public static shutdown = (): void => {
 		Renderer2D.data.delete();
+		Renderer2D.sceneDataUBuffer.delete();
+		Renderer2D.materialUBuffer.delete();
 	}
+
 
 	public static beginScene = (camera: OrthographicCamera | PerspectiveCamera): void => {
 		Renderer2D.sceneData = new SceneData(camera.getViewProjectionMatrix());
@@ -78,15 +91,27 @@ class Renderer2D {
 	}
 
 
-	public static drawQuad = (position: Vec2, size: Vec2, color: Vec4): void => {
+	public static drawColorQuad = (position: Vec2 | Vec3, size: Vec2, color: Vec4): void => {
 		const transform = Mat4.create();
-		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], 0));
-		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 0));
+		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
+		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
 
 		Renderer2D.materialUBuffer.setData(new Float32Array(color));
 		Renderer2D.data.flatColorShader.bind();
 		Renderer2D.data.flatColorShader.uploadUniformMat4('u_Transform', transform);
 		Renderer2D.data.flatColorShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
+		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
+	}
+
+	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, texture: Texture2D): void => {
+		const transform = Mat4.create();
+		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
+		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
+
+		texture.bind(0);
+		Renderer2D.data.texture2DShader.bind();
+		Renderer2D.data.texture2DShader.uploadUniformMat4('u_Transform', transform);
+		Renderer2D.data.texture2DShader.uploadUniformInt('u_Texture', [0]);
 		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
 	}
 

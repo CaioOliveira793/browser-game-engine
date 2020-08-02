@@ -1,6 +1,6 @@
 import vertexSource from './Shaders/FlatColorVertex.glsl';
 import fragmentSource from './Shaders/FlatColorFrag.glsl';
 
-export const vertex = vertexSource;
-export const fragment = fragmentSource;
+export const flatColorVertexSource = vertexSource;
+export const flatColorFragmentSource = fragmentSource;
 
