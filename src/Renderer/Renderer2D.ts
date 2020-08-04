@@ -1,4 +1,4 @@
-import { mat4 as Mat4, vec2 as Vec2, vec3 as Vec3, vec4 as Vec4 } from 'gl-matrix';
+import { mat4 as Mat4, vec2 as Vec2, vec3 as Vec3, vec4 as Vec4, glMatrix } from 'gl-matrix';
 
 import RendererCommand from './RendererCommand';
 
@@ -82,7 +82,6 @@ class Renderer2D {
 	public static beginScene = (camera: OrthographicCamera | PerspectiveCamera): void => {
 		Renderer2D.sceneData = new SceneData(camera.getViewProjectionMatrix());
 		Renderer2D.sceneDataUBuffer.setData(Renderer2D.sceneData.buffer);
-		Renderer2D.data.blankTexture.bind(0);
 		Renderer2D.data.quadShader.bind();
 		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
 	}
@@ -91,33 +90,32 @@ class Renderer2D {
 	}
 
 
-	public static drawColorQuad = (position: Vec2 | Vec3, size: Vec2, color: Vec4): void => {
+	public static drawColorQuad = (position: Vec2 | Vec3, size: Vec2, rotation: number, color: Vec4): void => {
 		const transform = Mat4.create();
 		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
+		Mat4.rotateZ(transform, transform, glMatrix.toRadian(rotation));
 		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
 
-		Renderer2D.materialUBuffer.setData(new Float32Array(color));
+		Renderer2D.drawQuad(transform, Renderer2D.data.blankTexture, color);
+	}
+
+	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, rotation: number, texture: Texture2D, tintColor = Vec4.fromValues(1.0, 1.0, 1.0, 1.0)): void => {
+		const transform = Mat4.create();
+		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
+		Mat4.rotateZ(transform, transform, glMatrix.toRadian(rotation));
+		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
+
+		Renderer2D.drawQuad(transform, texture, tintColor);
+	}
+
+	private static drawQuad = (transform: Mat4, texture: Texture2D, tintColor: Vec4): void => {
+		Renderer2D.materialUBuffer.setData(new Float32Array(tintColor));
+
+		texture.bind(0);
 
 		Renderer2D.data.quadShader.bind();
 		Renderer2D.data.quadShader.uploadUniformMat4('u_Transform', transform);
 		Renderer2D.data.quadShader.uploadUniformInt('u_Texture', [0]);
-		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
-
-		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
-	}
-
-	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, texture: Texture2D, tintColor = Vec4.fromValues(1.0, 1.0, 1.0, 1.0)): void => {
-		const transform = Mat4.create();
-		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
-		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
-
-		Renderer2D.materialUBuffer.setData(new Float32Array(tintColor));
-
-		texture.bind(1);
-
-		Renderer2D.data.quadShader.bind();
-		Renderer2D.data.quadShader.uploadUniformMat4('u_Transform', transform);
-		Renderer2D.data.quadShader.uploadUniformInt('u_Texture', [1]);
 		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
 
 		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
