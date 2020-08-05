@@ -34,11 +34,10 @@ export class Shader {
 	private readonly uniforms = new Map<string, UniformInfo>();
 	private readonly uniformBlocks = new Map<string, UniformBlockInfo>();
 
-	constructor(vertexSrc: string, fragmentSrc: string) {
-		this.compile(new Map([
-			[Shader.ctx.VERTEX_SHADER, vertexSrc],
-			[Shader.ctx.FRAGMENT_SHADER, fragmentSrc]
-		]));
+	constructor(shaderSource: string) {
+		const sources = this.preProcess(shaderSource);
+
+		this.compile(sources);
 
 		this.queryUniformBlockInfos();
 		this.queryUniformsInfos();
@@ -118,6 +117,34 @@ export class Shader {
 		Shader.ctx.bindBufferBase(Shader.ctx.UNIFORM_BUFFER, blockInfo.index, uniformBuffer.id);
 	}
 
+
+	private preProcess = (source: string): Map<GLenum, string> => {
+		const vertexType = /^#vertex/igm;
+		const fragmentType = /^#fragment/igm;
+
+		const vertexStartIndice = vertexType.exec(source)?.index as number;
+		const fragmentStartIndice = fragmentType.exec(source)?.index as number;
+
+		const vertex = source.slice(vertexStartIndice, fragmentStartIndice);
+		const fragment = source.slice(fragmentStartIndice);
+
+		// remove the flag (#vertex || #fragment) and jump to next line
+		let vertexSource = vertex.slice(vertex.indexOf('\n') + 1).trimLeft();
+		let fragmentSource = fragment.slice(fragment.indexOf('\n') + 1).trimLeft();
+
+		// remove spaces and break lines until the first non null character
+		while (vertexSource.indexOf('\n') === 0) {
+			vertexSource = vertexSource.slice(1).trimLeft();
+		}
+		while (fragmentSource.indexOf('\n') === 0) {
+			fragmentSource = fragmentSource.slice(1).trimLeft();
+		}
+
+		return new Map([
+			[Shader.ctx.VERTEX_SHADER, vertexSource],
+			[Shader.ctx.FRAGMENT_SHADER, fragmentSource]
+		]);
+	}
 
 	private compile = (sources: Map<GLenum, string>): void => {
 		this.id = Shader.ctx.createProgram() as WebGLProgram;
