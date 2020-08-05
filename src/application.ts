@@ -55,14 +55,14 @@ abstract class Application {
 	public requestFullscreen = (): Promise<void> => this.screen.setFullscreen()
 
 	public init = (): void => {
-		this.screen.addEvents();
+		this.screen.start();
 		this.isRunning = true;
 		requestAnimationFrame(this.run);
 	}
 
 	public end = (): void => {
-		this.screen.removeEvents();
 		this.isRunning = false;
+		this.screen.close();
 	}
 
 	// only called by the class Application

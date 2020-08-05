@@ -39,15 +39,23 @@ export class Screen {
 		this.screenResizeObserver = new ResizeObserver(this.handleScreenResizeMutationCallback);
 	}
 
-	public getWidth = (): number => this.canvas.clientWidth;
-	public getHeight = (): number => this.canvas.clientHeight;
-
-	public getContext = (): WebGL2RenderingContext => this.context;
-	public getCanvas = (): HTMLCanvasElement => this.canvas;
-
 	public setFullscreen = (): Promise<void> => this.canvas.requestFullscreen({ navigationUI: 'hide' });
 
-	public addEvents = (): void => {
+	public start = (): void => {
+		if (!this.context.isContextLost() && document.contains(this.canvas))
+			Renderer.init(this.context);
+		else
+			throw new Error('Current WebGL2 context no longer exists');
+
+		this.addEvents();
+	}
+	public close = (): void => {
+		Renderer.shutdown();
+		this.removeEvents();
+	}
+
+
+	private addEvents = (): void => {
 		const listenerOptions = {
 			capture: true,
 			once: false,
@@ -75,7 +83,7 @@ export class Screen {
 		this.canvas.addEventListener('wheel', this.handleMouseScroll, listenerOptions);
 	}
 
-	public removeEvents = (): void => {
+	private removeEvents = (): void => {
 		const listenerOptions = {
 			capture: true,
 			once: false,
