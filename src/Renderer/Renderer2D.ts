@@ -31,37 +31,128 @@ class SceneData {
 
 
 class Renderer2DData {
-	public readonly quadVertexArray: VertexArray;
-	public readonly quadShader: Shader;
+	public readonly maxGeometries: number;
+	public readonly maxVertices: number;
+	public readonly maxIndices: number;
+	public readonly maxTextureSlots: number;
+
+	public readonly elementsPerVertice: number;
+
+	// index of vertex:
+	public verticeIndex: number;
+
+	public indexCount: number;
+	public vertexCount: number;
+	public textureCount: number;
+	public geometryCount: number
+
+	public readonly vertexBufferData: Float32Array;
+	public readonly indexBufferData: Uint16Array;
+	public readonly geometryMaterialData: ArrayBuffer;
+	public readonly transformData: Float32Array;
+
+	public readonly vertexArray: VertexArray;
+	public readonly vertexBuffer: VertexBuffer;
+	public readonly indexBuffer: IndexBuffer;
+	public readonly shader: Shader;
+	public readonly textures: Texture2D[];
 	public readonly blankTexture: Texture2D;
+	public readonly geometryMaterial: UniformBuffer;
 
 	constructor() {
-		this.quadVertexArray = new VertexArray();
-		this.quadShader = new Shader(texture2DSource);
-		this.blankTexture = new Texture2D(1, 1, 4, Uint8ClampedArray, new Uint8ClampedArray([255, 255, 255, 255]));
+		this.elementsPerVertice = 6;
 
-		const vBuffer = new Float32Array([
-			-1.0, -1.0, 0.0, 0.0, 0.0, 1.0, // 0
-			1.0,  -1.0, 0.0, 1.0, 0.0, 1.0, // 1
-			1.0,   1.0, 0.0, 1.0, 1.0, 1.0, // 2
-			-1.0,  1.0, 0.0, 0.0, 1.0, 1.0, // 3
-		]);
+		this.maxGeometries = 1000;
+		this.maxVertices = this.maxGeometries * this.elementsPerVertice * 4; // 4 = only drawing quads for now
+		this.maxIndices = this.maxGeometries * 6;                            // 6 =           ||
+		this.maxTextureSlots = 4;
 
-		const vertexBuffer = new VertexBuffer(vBuffer.length, vBuffer);
-		vertexBuffer.setLayout(new BufferLayout([
+		this.verticeIndex = 0;
+
+		this.indexCount = 0;
+		this.vertexCount = 0;
+		this.textureCount = 0;
+		this.geometryCount = 0;
+
+		this.vertexBufferData = new Float32Array(this.maxVertices);
+		this.indexBufferData = new Uint16Array(this.maxIndices);
+
+		// uniform buffer needs to be the same size used in the shader
+		this.geometryMaterialData = new ArrayBuffer(32 * 1000); // 32 = UB byteLength * 1000 = UB length  // exe: UB[1000]
+		this.transformData = new Float32Array(this.maxGeometries * 16);
+
+		this.geometryMaterial = new UniformBuffer(this.geometryMaterialData.byteLength);
+		this.vertexArray = new VertexArray();
+		this.vertexBuffer = new VertexBuffer(this.vertexBufferData.byteLength);
+		this.indexBuffer = new IndexBuffer(this.indexBufferData.byteLength, this.indexBufferData.BYTES_PER_ELEMENT as 1 | 2 | 4);
+
+		this.vertexBuffer.setLayout(new BufferLayout([
 			{ type: ShaderDataType.Float3 },
 			{ type: ShaderDataType.Float2 },
 			{ type: ShaderDataType.Float },
 		]));
+		this.vertexArray.addVertexBuffer(this.vertexBuffer);
+		this.vertexArray.setIndexBuffer(this.indexBuffer);
 
-		this.quadVertexArray.addVertexBuffer(vertexBuffer);
-		this.quadVertexArray.setIndexBuffer(new IndexBuffer(new Uint8Array([0, 1, 2, 3, 0, 2])));
+		this.shader = new Shader(texture2DSource);
+		this.blankTexture = new Texture2D(1, 1, 4, Uint8ClampedArray, new Uint8ClampedArray([255, 255, 255, 255]));
+		this.textures = [this.blankTexture];
+	}
+
+	public addGeometry = (vertexData: Float32Array, indexData: Uint16Array, transform: Mat4, material: Float32Array): void => {
+		this.vertexBufferData.set(vertexData, this.vertexCount);
+		this.indexBufferData.set(indexData, this.indexCount);
+		this.transformData.set(transform, this.geometryCount * 16); // 16 = offset length
+
+		(new Float32Array(this.geometryMaterialData)).set(material, this.geometryCount * 8); // 8 = offset length
+
+		this.verticeIndex += vertexData.length / this.elementsPerVertice;
+
+		this.vertexCount += vertexData.length;
+		this.indexCount += indexData.length;
+		this.geometryCount += 1;
+	}
+
+	public addTexture = (texture: Texture2D): number => {
+		for (let i = 0; i < this.textureCount; i++)
+			if (this.textures[i].id === texture.id) return i;
+
+		this.textures[this.textureCount] = texture;
+		return this.textureCount++;
+	}
+
+	public reset = (): void => {
+		for (let i = 0; i < this.textureCount; i++) this.textures.pop();
+		this.verticeIndex = 0;
+
+		this.vertexCount = 0;
+		this.indexCount = 0;
+		this.textureCount = 0;
+		this.geometryCount = 0;
+	}
+
+	public upload = (): void => {
+		this.vertexBuffer.setData(this.vertexBufferData);
+		this.indexBuffer.setData(this.indexBufferData);
+		this.geometryMaterial.setData(this.geometryMaterialData);
+
+		for (let i = 0; i < this.textureCount; i++) {
+			this.textures[i].bind(i);
+		}
+
+		this.shader.bind();
+		this.shader.uploadUniformInt('u_Texture[0]', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+		this.shader.uploadUniformMat4('u_Transform[0]', this.transformData);
+		this.shader.uploadUniformBuffer('ub_Material', this.geometryMaterial);
 	}
 
 	public delete = (): void => {
-		this.quadVertexArray.delete();
-		this.quadShader.delete();
+		this.vertexArray.delete();
+		this.vertexBuffer.delete();
+		this.indexBuffer.delete();
+		this.shader.delete();
 		this.blankTexture.delete();
+		this.geometryMaterial.delete();
 	}
 }
 
@@ -71,23 +162,23 @@ class Renderer2D {
 		Renderer2D.data = new Renderer2DData();
 		Renderer2D.sceneData = new SceneData(Mat4.create());
 		Renderer2D.sceneDataUBuffer = new UniformBuffer(Renderer2D.sceneData.buffer.byteLength);
-		Renderer2D.materialUBuffer = new UniformBuffer(32 * 1);
 	}
 	public static shutdown = (): void => {
 		Renderer2D.data.delete();
 		Renderer2D.sceneDataUBuffer.delete();
-		Renderer2D.materialUBuffer.delete();
 	}
 
 
 	public static beginScene = (camera: OrthographicCamera | PerspectiveCamera): void => {
 		Renderer2D.sceneData = new SceneData(camera.getViewProjectionMatrix());
 		Renderer2D.sceneDataUBuffer.setData(Renderer2D.sceneData.buffer);
-		Renderer2D.data.quadShader.bind();
-		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
+		Renderer2D.data.shader.bind();
+		Renderer2D.data.shader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
 	}
 	public static endScene = (): void => {
-		///////////////////////////////////////////
+		if (Renderer2D.data.geometryCount !== 0)
+			Renderer2D.flush();
+		Renderer2D.drawCalls = 0;
 	}
 
 
@@ -110,32 +201,54 @@ class Renderer2D {
 	}
 
 	private static drawQuad = (transform: Mat4, texture: Texture2D, tintColor: Vec4): void => {
-		const size = 32;
-		const elements = 1;
-		for (let i = 0; i < elements; i++) {
-			Renderer2D.materialUBuffer.setData(new Float32Array(tintColor), i * size + 0);
-			Renderer2D.materialUBuffer.setData(new Int8Array([0]), i * size + 16);
-			Renderer2D.materialUBuffer.setData(new Float32Array([1.0]), i * size + 20);
-		}
+		if (Renderer2D.data.geometryCount === Renderer2D.data.maxGeometries ||
+			Renderer2D.data.indexCount + 6 > Renderer2D.data.maxIndices ||
+			Renderer2D.data.vertexCount + 24 > Renderer2D.data.maxVertices ||
+			Renderer2D.data.textureCount + 1 > Renderer2D.data.maxTextureSlots) Renderer2D.flush();
 
-		const textureSlot = 0;
-		texture.bind(textureSlot);
+		const textureIndex = Renderer2D.data.addTexture(texture);
 
-		Renderer2D.data.quadShader.bind();
-		Renderer2D.data.quadShader.uploadUniformMat4('u_Transform[0]', transform);
-		Renderer2D.data.quadShader.uploadUniformInt('u_Texture[0]', [textureSlot]);
-		Renderer2D.data.quadShader.uploadUniformBuffer('ub_Material', Renderer2D.materialUBuffer);
+		const tilingFactor = 1.0;
+		const material = new Float32Array([
+			tintColor[0], tintColor[1], tintColor[2], tintColor[3],
+			textureIndex, tilingFactor, 0.0,          0.0
+		]);
 
-		RendererCommand.drawIndexed(Renderer2D.data.quadVertexArray);
+		const vertexData = new Float32Array([
+			-1., -1.0, 0.0, 0.0, 0.0, Renderer2D.data.geometryCount, // 0
+			1.0, -1.0, 0.0, 1.0, 0.0, Renderer2D.data.geometryCount, // 1
+			1.0,  1.0, 0.0, 1.0, 1.0, Renderer2D.data.geometryCount, // 2
+			-1.,  1.0, 0.0, 0.0, 1.0, Renderer2D.data.geometryCount, // 3
+		]);
+
+		const indexData = new Uint16Array([
+			Renderer2D.data.verticeIndex,
+			Renderer2D.data.verticeIndex + 1,
+			Renderer2D.data.verticeIndex + 2,
+			Renderer2D.data.verticeIndex + 3,
+			Renderer2D.data.verticeIndex,
+			Renderer2D.data.verticeIndex + 2,
+		]);
+
+		Renderer2D.data.addGeometry(vertexData, indexData, transform, material);
 	}
 
+
+	private static flush = (): void => {
+		Renderer2D.data.upload();
+		RendererCommand.drawIndexed(Renderer2D.data.vertexArray);
+		Renderer2D.data.reset();
+		Renderer2D.drawCalls++;
+	}
 
 
 	private static data: Renderer2DData;
 
 	private static sceneData: SceneData;
 	private static sceneDataUBuffer: UniformBuffer;
-	private static materialUBuffer: UniformBuffer;
+
+
+	public static drawCalls = 0;
 }
 
 

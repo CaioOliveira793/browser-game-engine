@@ -6,7 +6,7 @@ export class Texture2D {
 	public static init = (context: WebGL2RenderingContext): void => { Texture2D.ctx = context; }
 
 
-	private readonly id: WebGLTexture;
+	public readonly id: WebGLTexture;
 
 	private dataFormat = Texture2D.ctx.RGBA;
 	private type = Texture2D.ctx.FLOAT;

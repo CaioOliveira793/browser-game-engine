@@ -2,7 +2,7 @@
 #version 300 es
 precision mediump float;
 
-#define MAX_GEOMETRY 1
+#define MAX_GEOMETRY 1000
 
 layout(location = 0) in vec4 a_Position;
 layout(location = 1) in vec2 a_TextureCoord;
@@ -28,7 +28,7 @@ void main() {
 #version 300 es
 precision mediump float;
 
-#define MAX_GEOMETRY 1
+#define MAX_GEOMETRY 1000
 #define MAX_SAMPLERS_2D 8
 
 in vec2 v_TextureCoord;
@@ -36,7 +36,7 @@ in float v_GeometryIndex;
 
 struct Material {
 	vec4 color;
-	int textureIndex;
+	float textureIndex;
 	float tilingFactor;
 };
 
@@ -53,7 +53,7 @@ void main() {
 	int gi = int(v_GeometryIndex);
 	vec4 texColor = material[gi].color;
 
-	switch (material[gi].textureIndex) {
+	switch (int(material[gi].textureIndex)) {
 		case 0: texColor *= texture(u_Texture[0], v_TextureCoord * material[gi].tilingFactor); break;
 		case 1: texColor *= texture(u_Texture[1], v_TextureCoord * material[gi].tilingFactor); break;
 		case 2: texColor *= texture(u_Texture[2], v_TextureCoord * material[gi].tilingFactor); break;
