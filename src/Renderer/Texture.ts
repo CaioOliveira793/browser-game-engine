@@ -50,9 +50,9 @@ export class Texture2D {
 
 		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_MIN_FILTER, Texture2D.ctx.NEAREST);
 		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_MAG_FILTER, Texture2D.ctx.NEAREST);
-		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_WRAP_S, Texture2D.ctx.CLAMP_TO_EDGE);
-		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_WRAP_T, Texture2D.ctx.CLAMP_TO_EDGE);
-		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_WRAP_R, Texture2D.ctx.CLAMP_TO_EDGE);
+		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_WRAP_S, Texture2D.ctx.REPEAT);
+		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_WRAP_T, Texture2D.ctx.REPEAT);
+		Texture2D.ctx.texParameteri(Texture2D.ctx.TEXTURE_2D, Texture2D.ctx.TEXTURE_WRAP_R, Texture2D.ctx.REPEAT);
 	}
 
 	public bind = (textureSlot = 0): void => {

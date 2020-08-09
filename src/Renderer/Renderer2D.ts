@@ -15,6 +15,13 @@ import texture2DSource from './Materials/Shaders/Texture2D.glsl';
 import { OrthographicCamera, PerspectiveCamera } from './Camera';
 
 
+interface Statistics {
+	draws: number;
+	geometries: number;
+	reset: () => void;
+}
+
+
 class SceneData {
 	public readonly viewProjectionMatrix: Mat4;
 
@@ -46,10 +53,10 @@ class Renderer2DData {
 	public textureCount: number;
 	public geometryCount: number
 
-	public readonly vertexBufferData: Float32Array;
-	public readonly indexBufferData: Uint16Array;
-	public readonly geometryMaterialData: ArrayBuffer;
-	public readonly transformData: Float32Array;
+	private readonly vertexBufferData: Float32Array;
+	private readonly indexBufferData: Uint16Array;
+	private readonly geometryMaterialData: ArrayBuffer;
+	private readonly transformData: Float32Array;
 
 	public readonly vertexArray: VertexArray;
 	public readonly vertexBuffer: VertexBuffer;
@@ -62,10 +69,10 @@ class Renderer2DData {
 	constructor() {
 		this.elementsPerVertice = 6;
 
-		this.maxGeometries = 1000;
+		this.maxGeometries = 1024;
 		this.maxVertices = this.maxGeometries * this.elementsPerVertice * 4; // 4 = only drawing quads for now
 		this.maxIndices = this.maxGeometries * 6;                            // 6 =           ||
-		this.maxTextureSlots = 4;
+		this.maxTextureSlots = 8;
 
 		this.verticeIndex = 0;
 
@@ -78,7 +85,7 @@ class Renderer2DData {
 		this.indexBufferData = new Uint16Array(this.maxIndices);
 
 		// uniform buffer needs to be the same size used in the shader
-		this.geometryMaterialData = new ArrayBuffer(32 * 1000); // 32 = UB byteLength * 1000 = UB length  // exe: UB[1000]
+		this.geometryMaterialData = new ArrayBuffer(32 * 1024); // 32 = UB byteLength * 1024 = UB length  // exe: UB[1024]
 		this.transformData = new Float32Array(this.maxGeometries * 16);
 
 		this.geometryMaterial = new UniformBuffer(this.geometryMaterialData.byteLength);
@@ -162,6 +169,12 @@ class Renderer2D {
 		Renderer2D.data = new Renderer2DData();
 		Renderer2D.sceneData = new SceneData(Mat4.create());
 		Renderer2D.sceneDataUBuffer = new UniformBuffer(Renderer2D.sceneData.buffer.byteLength);
+
+		Renderer2D.stats = {
+			draws: 0,
+			geometries: 0,
+			reset(): void { this.draws = 0; this.geometries = 0; }
+		};
 	}
 	public static shutdown = (): void => {
 		Renderer2D.data.delete();
@@ -176,9 +189,8 @@ class Renderer2D {
 		Renderer2D.data.shader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
 	}
 	public static endScene = (): void => {
-		if (Renderer2D.data.geometryCount !== 0)
+		if (Renderer2D.data.geometryCount > 0)
 			Renderer2D.flush();
-		Renderer2D.drawCalls = 0;
 	}
 
 
@@ -188,19 +200,20 @@ class Renderer2D {
 		Mat4.rotateZ(transform, transform, glMatrix.toRadian(rotation));
 		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
 
-		Renderer2D.drawQuad(transform, Renderer2D.data.blankTexture, color);
+		Renderer2D.drawQuad(transform, Renderer2D.data.blankTexture, color, 1.0);
 	}
 
-	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, rotation: number, texture: Texture2D, tintColor = Vec4.fromValues(1.0, 1.0, 1.0, 1.0)): void => {
+	public static drawTexQuad = (position: Vec2 | Vec3, size: Vec2, rotation: number, texture: Texture2D,
+		tintColor = Vec4.fromValues(1.0, 1.0, 1.0, 1.0), tilingFactor = 1.0): void => {
 		const transform = Mat4.create();
 		Mat4.translate(transform, transform, Vec3.fromValues(position[0], position[1], position[2] ?? 0));
 		Mat4.rotateZ(transform, transform, glMatrix.toRadian(rotation));
 		Mat4.scale(transform, transform, Vec3.fromValues(size[0], size[1], 1));
 
-		Renderer2D.drawQuad(transform, texture, tintColor);
+		Renderer2D.drawQuad(transform, texture, tintColor, tilingFactor);
 	}
 
-	private static drawQuad = (transform: Mat4, texture: Texture2D, tintColor: Vec4): void => {
+	private static drawQuad = (transform: Mat4, texture: Texture2D, tintColor: Vec4, tilingFactor: number): void => {
 		if (Renderer2D.data.geometryCount === Renderer2D.data.maxGeometries ||
 			Renderer2D.data.indexCount + 6 > Renderer2D.data.maxIndices ||
 			Renderer2D.data.vertexCount + 24 > Renderer2D.data.maxVertices ||
@@ -208,7 +221,6 @@ class Renderer2D {
 
 		const textureIndex = Renderer2D.data.addTexture(texture);
 
-		const tilingFactor = 1.0;
 		const material = new Float32Array([
 			tintColor[0], tintColor[1], tintColor[2], tintColor[3],
 			textureIndex, tilingFactor, 0.0,          0.0
@@ -231,24 +243,23 @@ class Renderer2D {
 		]);
 
 		Renderer2D.data.addGeometry(vertexData, indexData, transform, material);
+		Renderer2D.stats.geometries++;
 	}
 
-
-	private static flush = (): void => {
+	public static flush = (): void => {
 		Renderer2D.data.upload();
-		RendererCommand.drawIndexed(Renderer2D.data.vertexArray);
+		RendererCommand.drawIndexed(Renderer2D.data.vertexArray, Renderer2D.data.indexCount);
 		Renderer2D.data.reset();
-		Renderer2D.drawCalls++;
+		Renderer2D.stats.draws++;
 	}
+
+	public static stats: Statistics;
 
 
 	private static data: Renderer2DData;
 
 	private static sceneData: SceneData;
 	private static sceneDataUBuffer: UniformBuffer;
-
-
-	public static drawCalls = 0;
 }
 
 
