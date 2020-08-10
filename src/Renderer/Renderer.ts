@@ -43,8 +43,8 @@ class Renderer {
 
 	public static submit = (shader: Shader, vertexArray: VertexArray, transform = Mat4.create()): void => {
 		shader.bind();
-		shader.uploadUniformBuffer('ub_Scene', Renderer.sceneDataUBuffer);
-		shader.uploadUniformMat4('u_Transform', transform);
+		shader.uploadBuffer('ub_Scene', Renderer.sceneDataUBuffer);
+		shader.uploadMat4('u_Transform', transform);
 		RendererCommand.drawIndexed(vertexArray);
 	}
 

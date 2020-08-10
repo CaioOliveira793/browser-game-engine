@@ -1,11 +1,10 @@
 import VertexBuffer from './VertexBuffer';
-import IndexBuffer from './IndexBuffer';
+import IndexBuffer, { IndexBufferType } from './IndexBuffer';
 import { ShaderDataType } from './BufferLayout';
 
 
 class VertexArray {
 	private static ctx: WebGL2RenderingContext;
-
 	public static init = (context: WebGL2RenderingContext): void => { VertexArray.ctx = context; }
 
 	private static shaderDataTypeToWebGLType = (type: ShaderDataType): number => {
@@ -31,7 +30,7 @@ class VertexArray {
 
 	private vertexBuffers: VertexBuffer[];
 	private vertexBufferIndex: number;
-	private indexBuffer?: IndexBuffer;
+	private indexBuffer?: IndexBuffer<IndexBufferType>;
 
 	constructor() {
 		this.id = VertexArray.ctx.createVertexArray() as WebGLVertexArrayObject;
@@ -47,27 +46,6 @@ class VertexArray {
 		const layout = vertexBuffer.getLayout();
 		layout.forEach(element => {
 			switch (element.type) {
-				case ShaderDataType.Float:
-				case ShaderDataType.Float2:
-				case ShaderDataType.Float3:
-				case ShaderDataType.Float4:
-				case ShaderDataType.Int:
-				case ShaderDataType.Int2:
-				case ShaderDataType.Int3:
-				case ShaderDataType.Int4:
-				case ShaderDataType.Bool: {
-					VertexArray.ctx.enableVertexAttribArray(this.vertexBufferIndex);
-					VertexArray.ctx.vertexAttribPointer(this.vertexBufferIndex,
-						element.componentCount,
-						VertexArray.shaderDataTypeToWebGLType(element.type),
-						element.normalized,
-						layout.stride,
-						element.offset);
-
-					this.vertexBufferIndex++;
-					break;
-				}
-
 				case ShaderDataType.Mat3:
 				case ShaderDataType.Mat4: {
 					const count = element.componentCount;
@@ -83,6 +61,20 @@ class VertexArray {
 
 						this.vertexBufferIndex++;
 					}
+					break;
+				}
+
+				default: {
+					VertexArray.ctx.enableVertexAttribArray(this.vertexBufferIndex);
+					VertexArray.ctx.vertexAttribPointer(this.vertexBufferIndex,
+						element.componentCount,
+						VertexArray.shaderDataTypeToWebGLType(element.type),
+						element.normalized,
+						layout.stride,
+						element.offset);
+
+					this.vertexBufferIndex++;
+					break;
 				}
 			}
 		});
@@ -90,10 +82,10 @@ class VertexArray {
 		this.vertexBuffers.push(vertexBuffer);
 	}
 
-	public getIndexBuffer = (): IndexBuffer => this.indexBuffer as IndexBuffer;
-	public setIndexBuffer = (indexBuffer: IndexBuffer): void => {
+	public getIndexBuffer = (): IndexBuffer<IndexBufferType> => this.indexBuffer as IndexBuffer<IndexBufferType>;
+	public setIndexBuffer = <T extends IndexBufferType>(indexBuffer: IndexBuffer<T>): void => {
 		VertexArray.ctx.bindVertexArray(this.id);
-		this.indexBuffer = indexBuffer;
+		this.indexBuffer = indexBuffer as IndexBuffer<IndexBufferType>;
 		this.indexBuffer.bind();
 	}
 

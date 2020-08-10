@@ -60,7 +60,7 @@ class Renderer2DData {
 
 	public readonly vertexArray: VertexArray;
 	public readonly vertexBuffer: VertexBuffer;
-	public readonly indexBuffer: IndexBuffer;
+	public readonly indexBuffer: IndexBuffer<Uint16Array>;
 	public readonly shader: Shader;
 	public readonly textures: Texture2D[];
 	public readonly blankTexture: Texture2D;
@@ -148,9 +148,9 @@ class Renderer2DData {
 		}
 
 		this.shader.bind();
-		this.shader.uploadUniformInt('u_Texture[0]', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
-		this.shader.uploadUniformMat4('u_Transform[0]', this.transformData);
-		this.shader.uploadUniformBuffer('ub_Material', this.geometryMaterial);
+		this.shader.uploadInt('u_Texture[0]', [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]);
+		this.shader.uploadMat4('u_Transform[0]', this.transformData);
+		this.shader.uploadBuffer('ub_Material', this.geometryMaterial);
 	}
 
 	public delete = (): void => {
@@ -186,11 +186,12 @@ class Renderer2D {
 		Renderer2D.sceneData = new SceneData(camera.getViewProjectionMatrix());
 		Renderer2D.sceneDataUBuffer.setData(Renderer2D.sceneData.buffer);
 		Renderer2D.data.shader.bind();
-		Renderer2D.data.shader.uploadUniformBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
+		Renderer2D.data.shader.uploadBuffer('ub_Scene', Renderer2D.sceneDataUBuffer);
 	}
 	public static endScene = (): void => {
 		if (Renderer2D.data.geometryCount > 0)
 			Renderer2D.flush();
+		Renderer2D.stats.reset();
 	}
 
 

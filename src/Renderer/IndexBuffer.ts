@@ -1,4 +1,6 @@
-class IndexBuffer {
+export type IndexBufferType = Uint8Array | Uint16Array | Uint32Array;
+
+class IndexBuffer<T extends IndexBufferType> {
 	private static ctx: WebGL2RenderingContext;
 
 	public static init = (context: WebGL2RenderingContext): void => { IndexBuffer.ctx = context; }
@@ -10,7 +12,7 @@ class IndexBuffer {
 	public readonly type: GLenum = 0;
 	public readonly indiceSize: 1 | 2 | 4 = 1;
 
-	constructor(size: number, indiceSize: 1 | 2 | 4, data?: Uint8Array | Uint16Array | Uint32Array) {
+	constructor(size: number, indiceSize: 1 | 2 | 4, data?: T) {
 		this.id = IndexBuffer.ctx.createBuffer() as WebGLBuffer;
 
 		IndexBuffer.ctx.bindBuffer(IndexBuffer.ctx.ELEMENT_ARRAY_BUFFER, this.id);
@@ -33,7 +35,7 @@ class IndexBuffer {
 		}
 	}
 
-	public setData = (data: Uint8Array | Uint16Array | Uint32Array, destOffset = 0, srcOffset = 0, length = 0): void => {
+	public setData = (data: T, destOffset = 0, srcOffset = 0, length = 0): void => {
 		IndexBuffer.ctx.bindBuffer(IndexBuffer.ctx.ELEMENT_ARRAY_BUFFER, this.id);
 		IndexBuffer.ctx.bufferSubData(IndexBuffer.ctx.ELEMENT_ARRAY_BUFFER, destOffset, data, srcOffset, length);
 	}

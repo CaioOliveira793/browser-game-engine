@@ -33,7 +33,7 @@ export class MaterialInstance {
 	public upload = (): void => {
 		this.uniformBuffer.setData(this.buffer);
 		this.material.shader.bind();
-		this.material.shader.uploadUniformBuffer('ub_Material', this.uniformBuffer);
+		this.material.shader.uploadBuffer('ub_Material', this.uniformBuffer);
 	}
 
 	public getShader = (): Shader => this.material.shader;

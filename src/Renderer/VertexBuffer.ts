@@ -3,7 +3,6 @@ import BufferLayout from './BufferLayout';
 
 class VertexBuffer {
 	private static ctx: WebGL2RenderingContext;
-
 	public static init = (context: WebGL2RenderingContext): void => { VertexBuffer.ctx = context; }
 
 

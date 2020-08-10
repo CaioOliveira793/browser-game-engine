@@ -9,8 +9,8 @@ abstract class Application {
 	private isRunning: boolean;
 	private previousTime: number;
 
-	private layerQueue: Map<Layer, Layer>;
-	private overlayQueue: Map<Layer, Layer>;
+	private layerQueue: Set<Layer>;
+	private overlayQueue: Set<Layer>;
 	private eventQueue: Set<TypedEvents>;
 
 	constructor(canvas: HTMLCanvasElement) {
@@ -19,13 +19,13 @@ abstract class Application {
 		this.isRunning = false;
 		this.previousTime = 0;
 
-		this.layerQueue = new Map();
-		this.overlayQueue = new Map();
+		this.layerQueue = new Set();
+		this.overlayQueue = new Set();
 		this.eventQueue = new Set();
 	}
 
 	public pushLayer = (layer: Layer): void => {
-		this.layerQueue.set(layer, layer);
+		this.layerQueue.add(layer);
 		layer.onAttach();
 	}
 
@@ -39,7 +39,7 @@ abstract class Application {
 	}
 
 	public pushOverlay = (overlay: Layer): void => {
-		this.overlayQueue.set(overlay, overlay);
+		this.overlayQueue.add(overlay);
 		overlay.onDetach();
 	}
 

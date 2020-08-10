@@ -10,3 +10,6 @@ node_modules
 !sandbox/exemple.index.ts
 !sandbox/exemple.layer.ts
 !sandbox/tsconfig.json
+
+# temp
+.temp
