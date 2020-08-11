@@ -20,7 +20,9 @@ class RendererCommand {
 		Texture2D.init(context);
 
 		RendererCommand.ctx.enable(RendererCommand.ctx.CULL_FACE);
+
 		RendererCommand.ctx.enable(RendererCommand.ctx.DEPTH_TEST);
+		RendererCommand.ctx.depthFunc(RendererCommand.ctx.LEQUAL);
 
 		RendererCommand.ctx.enable(RendererCommand.ctx.BLEND);
 		RendererCommand.ctx.blendFunc(RendererCommand.ctx.SRC_ALPHA, RendererCommand.ctx.ONE_MINUS_SRC_ALPHA);

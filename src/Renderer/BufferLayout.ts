@@ -51,11 +51,11 @@ function shaderDataTypeTocomponentCount(type: ShaderDataType): number {
 
 
 export interface BufferElement {
-	type: ShaderDataType;
-	normalized: boolean;
-	size: number;
-	offset: number;
-	componentCount: number;
+	readonly type: ShaderDataType;
+	readonly normalized: boolean;
+	readonly size: number;
+	readonly offset: number;
+	readonly componentCount: number;
 }
 
 export class BufferLayout extends Array<BufferElement> {
