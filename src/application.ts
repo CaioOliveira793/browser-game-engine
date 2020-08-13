@@ -75,12 +75,17 @@ abstract class Application {
 		this.previousTime = time;
 
 		Input.reset();
-		this.eventQueue.forEach(event => this.eventPropagator(event));
+		for (const event of this.eventQueue)
+			this.eventPropagator(event);
+
 		this.eventQueue.clear();
 
 		if (this.isRunning) {
-			this.layerQueue.forEach(layer => layer.onUpdate(deltaTime));
-			this.overlayQueue.forEach(overlay => overlay.onUpdate(deltaTime));
+			for (const layer of this.layerQueue)
+				layer.onUpdate(deltaTime);
+
+			for (const overlay of this.overlayQueue)
+				overlay.onUpdate(deltaTime);
 
 			requestAnimationFrame(this.run);
 		}
