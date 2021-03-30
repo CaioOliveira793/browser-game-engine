@@ -17,14 +17,29 @@
 
 		body {
 			height: 100vh;
-
 			display: flex;
+			flex-direction: column;
 			justify-content: center;
 			align-items: center;
 		}
 
-		#test-canvas {
+		#main-canvas {
+			margin-top: 20px;
 			border: 2px solid #000;
+			width: 90%;
+			height: 90%;
+		}
+
+		#fullscreen-button {
+			margin: 20px 0px;
+			padding: 8px 12px;
+			color: rgb(243, 208, 52);
+			background-color: rgb(73, 72, 59);
+			transition: opacity 0.2s;
+		}
+
+		#fullscreen-button:hover {
+			opacity: 0.8;
 		}
 	</style>
 
@@ -32,7 +47,7 @@
 	<script src="bundle.js" type="module"></script>
 </head>
 <body>
-	<canvas id="test-canvas"></canvas>
-	<button id="fullscreen">Set Canvas Fullscreen</button>
+	<canvas id="main-canvas"></canvas>
+	<button id="fullscreen-button">Fullscreen</button>
 </body>
 </html>

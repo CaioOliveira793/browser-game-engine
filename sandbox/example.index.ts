@@ -1,5 +1,5 @@
 import Application from '@engine/Application';
-import ExempleLayer from './exemple.layer';
+import ExempleLayer from './layer';
 
 
 class MyApp extends Application {
@@ -10,10 +10,6 @@ class MyApp extends Application {
 		this.layer = new ExempleLayer;
 
 		this.pushLayer(this.layer);
-
-		setTimeout(() => {
-			super.popLayer(this.layer);
-		}, 10000);
 	}
 
 	protected onScreenEvent = (): void => {/* */}
@@ -23,15 +19,15 @@ class MyApp extends Application {
 
 
 // creating app:
-const canvas = document.getElementById('test-canvas') as HTMLCanvasElement;
+const canvas = document.getElementById('main-canvas') as HTMLCanvasElement;
 
 const app = new MyApp(canvas);
 app.init();
 
 
 // set fullscreen:
-const fullscreenButton = document.getElementById('fullscreen') as HTMLButtonElement;
+const fullscreenButton = document.getElementById('fullscreen-button') as HTMLButtonElement;
 
 fullscreenButton.addEventListener('click', () => {
-	app.requestFullscreen().catch(err => console.log(err));
+	app.requestFullscreen().catch(console.log);
 });

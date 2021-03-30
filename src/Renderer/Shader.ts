@@ -156,6 +156,8 @@ export class Shader {
 			Shader.ctx.shaderSource(shader, src);
 			Shader.ctx.compileShader(shader);
 
+			// TODO: assert if compile succeeded
+
 			Shader.ctx.attachShader(this.id, shader);
 			shadersId.add(shader);
 		}

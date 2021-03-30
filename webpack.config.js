@@ -23,7 +23,7 @@ module.exports = {
 			patterns: [{
 				from: 'sandbox/*.html',
 				globOptions: {
-					ignore: ['**/exemple.*.*']
+					ignore: ['**/example.*.*']
 				},
 				flatten: true
 			}]

@@ -12,7 +12,6 @@ export class Screen {
 	private context: WebGL2RenderingContext;
 
 	private screenCloseObserver: MutationObserver;
-	// lib.dom.d.ts does not have the ResizeObserver yet
 	// @ts-ignore
 	private screenResizeObserver: ResizeObserver;
 	private eventCallback: (e: TypedEvents) => void;
@@ -20,7 +19,7 @@ export class Screen {
 	constructor(canvas: HTMLCanvasElement, eventCallback: (e: TypedEvents) => void) {
 		this.canvas = canvas;
 		this.canvas.width = this.canvas.clientWidth;
-		this.canvas.height = this.canvas.clientWidth;
+		this.canvas.height = this.canvas.clientHeight;
 		this.canvas.tabIndex = 0;
 
 		const webgl = canvas.getContext('webgl2');

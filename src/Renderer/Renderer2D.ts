@@ -228,10 +228,10 @@ class Renderer2D {
 		]);
 
 		const vertexData = new Float32Array([
-			-1., -1.0, 0.0, 0.0, 0.0, Renderer2D.data.geometryCount, // 0
-			1.0, -1.0, 0.0, 1.0, 0.0, Renderer2D.data.geometryCount, // 1
-			1.0,  1.0, 0.0, 1.0, 1.0, Renderer2D.data.geometryCount, // 2
-			-1.,  1.0, 0.0, 0.0, 1.0, Renderer2D.data.geometryCount, // 3
+			-.5,  -.5, 0.0, 0.0, 0.0, Renderer2D.data.geometryCount, // 0
+			0.5,  -.5, 0.0, 1.0, 0.0, Renderer2D.data.geometryCount, // 1
+			0.5,  0.5, 0.0, 1.0, 1.0, Renderer2D.data.geometryCount, // 2
+			-.5,  0.5, 0.0, 0.0, 1.0, Renderer2D.data.geometryCount, // 3
 		]);
 
 		const indexData = new Uint16Array([
