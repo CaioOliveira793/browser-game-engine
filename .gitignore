@@ -4,12 +4,5 @@ node_modules
 # distribution:
 /dist
 
-# test enviroment:
-/sandbox/**/*
-!sandbox/example.index.html
-!sandbox/example.index.ts
-!sandbox/example.layer.ts
-!sandbox/tsconfig.json
-
 # temp
 .temp
