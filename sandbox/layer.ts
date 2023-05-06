@@ -1,4 +1,4 @@
-import { vec2, vec3, vec4 } from 'gl-matrix';
+import { vec2, vec4 } from 'gl-matrix';
 import Layer from '@engine/Layer';
 import { EventDispatcher, EventType, TypedEvents } from '@engine/Events/Events';
 import { OrthographicCameraController } from '@engine/CameraController';
@@ -9,11 +9,13 @@ import { MouseScrollEvent } from '@engine/Events/MouseEvents';
 
 
 class ExempleLayer extends Layer {
-	private clearColor = vec4.fromValues(0.5, 0.5, 0.5, 1.0);
+	private readonly clearColor = vec4.fromValues(0.5, 0.5, 0.5, 1.0);
 
-	private cameraController = new OrthographicCameraController(100, 16 / 9);
+	private readonly cameraController = new OrthographicCameraController(100, 16 / 9);
 
-	private quadColor = vec4.fromValues(0.95, 0.81, 0.20, 1.0);
+	private quadColor = vec4.fromValues(0.1, 0.1, 0.20, 1.0);
+	private readonly angleVelocity = 45;
+	private quadAngle = 45;
 
 
 	public onAttach = (): void => {
@@ -28,17 +30,28 @@ class ExempleLayer extends Layer {
 
 		Renderer2D.beginScene(this.cameraController.getCamera());
 
-		Renderer2D.drawColorQuad(
-			vec3.fromValues(0, 0, 0),
-			vec2.fromValues(10, 10),
-			45,
-			this.quadColor
-		);
+		this.quadAngle += this.quadAngle > 360
+			? this.angleVelocity * deltaTime - 360
+			: this.angleVelocity * deltaTime;
+		
+		for (let j = 0; j < 10; j++) {
+			for (let i = 0; i < 10; i++) {
+				this.quadColor[0] = i * 0.1;
+				this.quadColor[1] = j * 0.1;
+
+				Renderer2D.drawColorQuad(
+					vec2.fromValues(i * 12, j * 12),
+					vec2.fromValues(10, 10),
+					this.quadAngle,
+					this.quadColor
+				);
+			}
+		}
 
 		Renderer2D.endScene();
 	}
 
-	public onKeyboardEvent = (e: TypedEvents): void => {/* */}
+	public onKeyboardEvent = (_e: TypedEvents): void => {/* */}
 
 	public onMouseEvent = (e: TypedEvents): void => {
 		const dispatcher = new EventDispatcher(e);

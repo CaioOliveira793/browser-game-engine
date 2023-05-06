@@ -10,7 +10,7 @@ import UniformBuffer from './UniformBuffer';
 import Shader from './Shader';
 import Texture2D from './Texture';
 
-import texture2DSource from './Materials/Shaders/Texture2D.glsl';
+import TEXTURE_2D_SOURCE from './Materials/Shaders/Texture2D.glsl';
 
 import { OrthographicCamera, PerspectiveCamera } from './Camera';
 
@@ -69,7 +69,7 @@ class Renderer2DData {
 	constructor() {
 		this.elementsPerVertice = 6;
 
-		this.maxGeometries = 1024;
+		this.maxGeometries = 64;
 		this.maxVertices = this.maxGeometries * this.elementsPerVertice * 4; // 4 = only drawing quads for now
 		this.maxIndices = this.maxGeometries * 6;                            // 6 =           ||
 		this.maxTextureSlots = 8;
@@ -101,7 +101,7 @@ class Renderer2DData {
 		this.vertexArray.addVertexBuffer(this.vertexBuffer);
 		this.vertexArray.setIndexBuffer(this.indexBuffer);
 
-		this.shader = new Shader(texture2DSource);
+		this.shader = new Shader(TEXTURE_2D_SOURCE);
 		this.blankTexture = new Texture2D(1, 1, 4, Uint8ClampedArray, new Uint8ClampedArray([255, 255, 255, 255]));
 		this.textures = [this.blankTexture];
 	}

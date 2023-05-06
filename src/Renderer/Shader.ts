@@ -23,6 +23,7 @@ export interface UniformInfo {
 	readonly location: WebGLUniformLocation;
 }
 
+const LOG_SHADER = false;
 
 export class Shader {
 	private static ctx: WebGL2RenderingContext;
@@ -156,7 +157,14 @@ export class Shader {
 			Shader.ctx.shaderSource(shader, src);
 			Shader.ctx.compileShader(shader);
 
-			// TODO: assert if compile succeeded
+			if (LOG_SHADER) {
+				const status = Shader.ctx.getShaderParameter(shader, Shader.ctx.COMPILE_STATUS);
+				const compilationLog = Shader.ctx.getShaderInfoLog(shader);
+
+				console.info('shader status:', status);
+				console.info('shader info:', compilationLog);
+				console.info('get error:', Shader.ctx.getError());
+			}
 
 			Shader.ctx.attachShader(this.id, shader);
 			shadersId.add(shader);

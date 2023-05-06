@@ -2,7 +2,7 @@
 #version 300 es
 precision mediump float;
 
-#define MAX_GEOMETRY 1024
+#define MAX_GEOMETRY 64
 
 layout(location = 0) in vec4 a_Position;
 layout(location = 1) in vec2 a_TextureCoord;
@@ -28,7 +28,7 @@ void main() {
 #version 300 es
 precision mediump float;
 
-#define MAX_GEOMETRY 1024
+#define MAX_GEOMETRY 64
 #define MAX_SAMPLERS_2D 8
 
 in vec2 v_TextureCoord;
